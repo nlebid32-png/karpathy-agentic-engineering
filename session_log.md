@@ -195,3 +195,91 @@ Returns a float 0.0–1.0 and a GO/STOP signal.
 ---
 
 *Session complete: 2026-05-21. 3 implementations delivered (25/25 tests pass), 3 deferred with actionable specs, 4 judge findings logged.*
+
+---
+
+## Session 2 — 2026-05-23
+
+**Directive:** Apply toolkit to a real project. Confirm target, audit, wire modules, run council.
+
+**Target confirmed:** Canvas AI Pipeline (`G:\My Drive\Claude work folder\canvas-ai-pipeline\`)
+
+**Rationale:** 4 Python files across a live multi-step generation pipeline (scraper → AI processor → formatter → Flask web API). Active development (Module 3 shipped as app.py between sessions). Real async/sync architectural decisions pending. Vault agent is already operational — less surface area for new integration. Canvas pipeline hypothesis from program.md confirmed correct.
+
+---
+
+### Agent-Native Surfaces Audit
+
+**canvas_scraper.py**
+- ❌ Raises bare `ValueError` / `requests.HTTPError` — no `ErrorCode`, no `recovery_hint`
+- ❌ No `health_check()` — no way to verify Canvas API reachability before a run
+- ❌ No `state_snapshot` on success — agent cannot confirm what was fetched
+- ✅ `paginate()` hides pagination details cleanly
+
+**ai_processor.py**
+- ❌ `generate_response()` raises bare exceptions — not AgentResponse-wrapped
+- ❌ Single-shot generation — no retry, no quality gate, no diversity detection
+- ❌ `main()` uses `input()` — completely non-agentic; blocks scheduled agent callers
+- ✅ Prompt templates clearly separated from generation logic
+
+**output_formatter.py**
+- ❌ No AgentResponse wrapping — bare `os.path.exists()` guard + print()
+- ❌ No state surfacing — caller cannot distinguish "exported 0 files" from "file not found"
+
+**app.py (Flask web API)**
+- ❌ `/api/generate` returns `{"error": str(e)}` on failure — no ErrorCode, no recovery_hint
+- ❌ Synchronous Anthropic API call blocks HTTP response (2-5s median, unknown p99)
+- ❌ No timeout configuration on any of the three boundaries: agent HTTP client, Flask worker, Anthropic SDK
+- ✅ `/api/stats` provides aggregate pipeline state
+- ✅ `/api/last_refresh` enables staleness detection
+- ✅ `/api/refresh` allows on-demand Canvas resync
+
+---
+
+### Top 3 Places Council Review Would Have Caught a Design Mistake
+
+1. **`input()` in `ai_processor.py main()`** — Goldratt would identify this as the constraint that prevents full pipeline automation. Musk would ask "who required this to be interactive?" — no owner → illegitimate requirement. The app.py Flask API was added as a workaround, but the CLI path remains broken for agent use.
+
+2. **Synchronous generation with undefined timeout boundaries** — Agent HTTP client timeout, Flask worker timeout, and Anthropic SDK timeout are three distinct configuration points being treated as one. Kahneman: planning fallacy — 2-5s estimate assumed as worst case, tail risk (~45s+ on overloaded API) not modeled. No retry/circuit-breaker policy exists.
+
+3. **No quality gate between generation and file write** — `generate_response()` output goes directly to `generated_responses.json` with no validation. No length check, no placeholder count check, no diversity check across assignments. Ohno: defect waste — downstream `output_formatter.py` exports docx files that may contain bad content with no detection mechanism.
+
+---
+
+### Task 4: diversity_check Wired into Canvas Pipeline
+
+**Concrete gap exposed:** `ai_processor.py::generate_response()` had no retry logic and no attention collapse detection. On a poor first attempt (formulaic, too short, excessive placeholders), there was no mechanism to detect or recover.
+
+**Implementation:**
+- Copied `implementations/diagnostic/diversity_check.py` → `canvas-ai-pipeline/diversity_check.py`
+- Split `generate_response()` into `_generate_once()` (raw API call) and `generate_response()` (retry harness)
+- Retry harness: first attempt always accepted; on subsequent attempts, `check_diversity()` computes Jaccard similarity against prior attempts; score > 0.75 → STOP signal → retry with explicit variation instruction appended to prompt
+- Default `max_retries=3`; caller (app.py) unchanged — signature-compatible
+
+**Verdict:** toolkit module activated against a real gap. No toolkit source code modified — the gap was real in the target project, not in the module.
+
+---
+
+### Task 5: Council Query — Canvas Generate Architecture
+
+**Query:** Should `/api/generate` keep synchronous HTTP response, convert to async job polling, or use a threading.Thread fire-and-forget queue?
+
+**Council verdict (5 new personas — Ohno, Musk, Kahneman, Dalio, Goldratt):**
+
+**CONDITIONAL-GO — Option A (synchronous), with three required conditions:**
+1. Measure and document actual Anthropic API p95/p99 latency under real workload
+2. Set explicit timeouts on all three boundaries: agent HTTP client, Flask worker, Anthropic SDK call — with consistent values derived from measurement
+3. Add observable failure signaling so the agent receives a deterministic error on timeout rather than a hang
+
+**Key Council findings:**
+- Options B and C introduce distributed-systems patterns (job queues, polling contracts) with no measured justification — Goldratt's constraint is the absence of p99 data, not the architecture
+- The "must not block HTTP" requirement has no owner → phantom constraint → Musk's deletion test fails it
+- Option C (threading.Thread) was disqualified: silent thread death produces a job ID that never resolves with no error signal, which is worse than a 30s timeout
+- Kahneman flagged availability heuristic driving complexity: the vivid >30s timeout scenario has no measured probability
+- The pre-mortem finding: "agent not updated to new polling contract" is a high-probability failure path for Options B and C
+
+**Full verdict saved to:** `council_canvas_generate_arch.json`
+
+---
+
+*Session 2 complete: 2026-05-23. Target confirmed (Canvas AI Pipeline). Audit complete (3 files, 11 gaps catalogued). diversity_check wired into ai_processor.py generation loop. Council ran 5 new domain-grounded personas on a live architectural decision. CONDITIONAL-GO verdict logged.*

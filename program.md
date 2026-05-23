@@ -8,11 +8,11 @@ implement the integrations, and refine based on what actually breaks.
 TBD — awaiting confirmation: Canvas pipeline or Vault agent.
 
 ## Active Task
-[ ] Confirm target project
-[ ] Audit target project against agent-native surfaces checklist
-[ ] Identify top 3 places council review would have caught a design mistake
-[ ] Wire diversity_check into the project's existing loop/test cycle
-[ ] Run one real council query on a live architectural decision in the project
+[x] Confirm target project
+[x] Audit target project against agent-native surfaces checklist
+[x] Identify top 3 places council review would have caught a design mistake
+[x] Wire diversity_check into the project's existing loop/test cycle
+[x] Run one real council query on a live architectural decision in the project
 
 ## Success Metric
 At least 2 toolkit modules actively integrated into the target project,
