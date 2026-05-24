@@ -165,13 +165,27 @@ def is_epic(item: dict) -> bool:
 # ---------------------------------------------------------------------------
 
 def _run_claude(prompt: str) -> int:
-    """Run claude -p with the given prompt. Returns exit code."""
-    result = subprocess.run(
-        [CLAUDE_BIN, "-p", prompt, "--allowedTools", "all"],
-        text=True,
-        encoding="utf-8",
-    )
-    return result.returncode
+    """
+    Run claude -p with the given prompt. Returns exit code.
+    Writes prompt to a temp file and feeds via stdin to avoid Windows
+    shell-quoting issues with multi-line, special-character prompts.
+    """
+    import tempfile
+    with tempfile.NamedTemporaryFile(
+        mode="w", suffix=".txt", delete=False, encoding="utf-8"
+    ) as f:
+        f.write(prompt)
+        temp_path = f.name
+
+    try:
+        cmd = f'"{CLAUDE_BIN}" -p - --dangerously-skip-permissions < "{temp_path}"'
+        result = subprocess.run(cmd, shell=True, text=True, encoding="utf-8")
+        return result.returncode
+    finally:
+        try:
+            os.unlink(temp_path)
+        except OSError:
+            pass
 
 
 def execute_regular(item: dict) -> bool:
