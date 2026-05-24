@@ -36,6 +36,11 @@ STATUS_FIELD_ID = "PVTSSF_lAHOEJXjQc4BYnxQzhTsSnc"
 POLL_INTERVAL = int(os.environ.get("POLL_INTERVAL", "60"))  # seconds
 MAX_PARALLEL_AGENTS = 3
 
+# Set WATCH_STATUSES env var to override, e.g. "Ready,Backlog" to auto-execute backlog items
+WATCH_STATUSES = {
+    s.strip() for s in os.environ.get("WATCH_STATUSES", "Ready").split(",")
+}
+
 STATUS_OPTIONS = {
     "Backlog":     "d6a65d2b",
     "Ready":       "f75ad846",
@@ -111,7 +116,7 @@ def fetch_ready_items() -> list[dict]:
     raw = _gh("project", "item-list", str(PROJECT_NUMBER),
               "--owner", OWNER, "--format", "json")
     data = json.loads(raw)
-    return [item for item in data["items"] if item.get("status") == "Ready"]
+    return [item for item in data["items"] if item.get("status") in WATCH_STATUSES]
 
 
 def set_status(item_id: str, status: str) -> None:
