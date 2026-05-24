@@ -36,9 +36,11 @@ STATUS_FIELD_ID = "PVTSSF_lAHOEJXjQc4BYnxQzhTsSnc"
 POLL_INTERVAL = int(os.environ.get("POLL_INTERVAL", "60"))  # seconds
 MAX_PARALLEL_AGENTS = 3
 
-# Set WATCH_STATUSES env var to override, e.g. "Ready,Backlog" to auto-execute backlog items
+# Watches Ready AND Backlog by default so items are picked up the moment
+# they're added to the board without needing a manual status change.
+# Override with WATCH_STATUSES env var, e.g. "Ready" to require manual promotion.
 WATCH_STATUSES = {
-    s.strip() for s in os.environ.get("WATCH_STATUSES", "Ready").split(",")
+    s.strip() for s in os.environ.get("WATCH_STATUSES", "Ready,Backlog").split(",")
 }
 
 STATUS_OPTIONS = {
@@ -88,7 +90,15 @@ Tool name: mcp__159b12f1-7d01-476f-9db5-4cb636d71f36__create_draft
 Required fields: to (["nlebid44@gmail.com"]), subject, htmlBody
 
 Do NOT say you cannot send email. Use create_draft to do it.
-Complete the task fully. At the end write a 1-2 sentence summary of what you did.\
+AFTER COMPLETING THE TASK:
+Always send a summary email draft to nlebid44@gmail.com using the Gmail MCP.
+Tool: mcp__159b12f1-7d01-476f-9db5-4cb636d71f36__create_draft
+  - to: ["nlebid44@gmail.com"]
+  - subject: "Task Done: <title of the task>"
+  - body: 3-5 bullet points of exactly what you did, what was created/sent/changed
+
+NEVER create Google Docs, Google Sheets, or Drive files as a way to report results.
+Email is the only output channel for reports.\
 """
 
 
