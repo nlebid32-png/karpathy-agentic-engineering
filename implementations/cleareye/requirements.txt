@@ -1,0 +1,9 @@
+anthropic>=0.40.0
+Flask>=3.0.0
+pdfminer.six>=20221105
+Pillow>=10.0.0
+pypdf>=4.0.0
+python-dotenv>=1.0.0
+requests>=2.31.0
+gunicorn>=21.0.0
+Werkzeug>=3.0.0

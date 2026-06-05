@@ -1,0 +1,1009 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ClearEye — Real Estate Investment Intelligence</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400;1,500;1,600&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+/* ── ClearEye Design System v4 — "Meridian" Light Theme ──────────── */
+:root {
+  --bg:          #F7F5F0;
+  --surface:     #FFFFFF;
+  --elevated:    #F2EFE9;
+  --overlay:     #EAE7E1;
+  --border:      #DDD9D1;
+  --border-em:   #C5BFB4;
+
+  --text:        #0D1926;
+  --sub:         #4A5568;
+  --muted:       #8D98A5;
+
+  --accent:      #155E44;
+  --accent-mid:  rgba(21,94,68,.14);
+  --accent-dim:  rgba(21,94,68,.07);
+  --accent-hover:#0E4530;
+
+  --green:       #15803D;
+  --green-dim:   rgba(21,128,61,.08);
+  --red:         #B91C1C;
+  --red-dim:     rgba(185,28,28,.07);
+  --amber:       #92400E;
+  --amber-dim:   rgba(146,64,14,.08);
+
+  --shadow-xs:   0 1px 2px rgba(0,0,0,.05);
+  --shadow-sm:   0 1px 4px rgba(0,0,0,.06), 0 2px 8px rgba(0,0,0,.04);
+  --shadow-md:   0 4px 16px rgba(0,0,0,.08), 0 2px 4px rgba(0,0,0,.04);
+  --shadow-lg:   0 8px 32px rgba(0,0,0,.10), 0 4px 8px rgba(0,0,0,.05);
+  --shadow-xl:   0 20px 56px rgba(0,0,0,.12), 0 8px 20px rgba(0,0,0,.06);
+  --shadow-card: 0 0 0 1px rgba(0,0,0,.04), 0 2px 6px rgba(0,0,0,.05), 0 8px 24px rgba(0,0,0,.06);
+
+  --r-sm:  5px;
+  --r-md:  10px;
+  --r-lg:  16px;
+  --r-xl:  24px;
+  --t:     160ms ease;
+
+  --font:    'Plus Jakarta Sans', -apple-system, sans-serif;
+  --display: 'Cormorant Garamond', Georgia, serif;
+  --mono:    'JetBrains Mono', 'SF Mono', Consolas, monospace;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+
+body {
+  background-color: var(--bg);
+  color: var(--text);
+  font-family: var(--font);
+  font-size: 15px;
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* ── Navbar ─────────────────────────────────────────────────────── */
+.nav {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  background: rgba(247,245,240,.92);
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+  border-bottom: 1px solid var(--border);
+  padding: 0 32px;
+  height: 60px;
+  display: flex;
+  align-items: center;
+  gap: 0;
+}
+.nav-brand {
+  font-family: var(--display);
+  font-size: 22px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  color: var(--accent);
+  text-decoration: none;
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  flex-shrink: 0;
+  transition: color var(--t);
+}
+.nav-brand:hover { color: var(--accent-hover); }
+.nav-brand-eye {
+  width: 28px;
+  height: 28px;
+  background: var(--accent);
+  border-radius: 7px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.nav-links {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  margin-left: 32px;
+}
+.nav-link {
+  font-size: 13.5px;
+  font-weight: 500;
+  color: var(--sub);
+  text-decoration: none;
+  padding: 6px 12px;
+  border-radius: var(--r-sm);
+  transition: color var(--t), background var(--t);
+}
+.nav-link:hover { color: var(--text); background: var(--overlay); }
+.nav-right { margin-left: auto; display: flex; align-items: center; gap: 8px; }
+.nav-btn-ghost {
+  font-size: 13.5px;
+  font-weight: 500;
+  color: var(--sub);
+  text-decoration: none;
+  padding: 7px 16px;
+  border-radius: var(--r-md);
+  border: 1px solid var(--border);
+  background: none;
+  transition: all var(--t);
+}
+.nav-btn-ghost:hover { color: var(--text); border-color: var(--border-em); background: var(--surface); }
+.nav-btn-primary {
+  font-size: 13.5px;
+  font-weight: 600;
+  color: #fff;
+  text-decoration: none;
+  padding: 8px 20px;
+  border-radius: var(--r-md);
+  background: var(--accent);
+  border: none;
+  transition: background var(--t), box-shadow var(--t);
+  box-shadow: 0 1px 3px rgba(21,94,68,.3), 0 4px 12px rgba(21,94,68,.15);
+}
+.nav-btn-primary:hover {
+  background: var(--accent-hover);
+  box-shadow: 0 2px 6px rgba(21,94,68,.35), 0 6px 20px rgba(21,94,68,.2);
+  color: #fff;
+}
+
+/* ── Hero ────────────────────────────────────────────────────────── */
+.hero {
+  padding: 92px 0 100px;
+  position: relative;
+  overflow: hidden;
+}
+.hero::before {
+  content: '';
+  position: absolute;
+  top: -40%;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 900px;
+  height: 700px;
+  background: radial-gradient(ellipse, rgba(21,94,68,.055) 0%, transparent 65%);
+  pointer-events: none;
+}
+.container { max-width: 1120px; margin: 0 auto; padding: 0 32px; }
+.hero-inner { display: grid; grid-template-columns: 1fr 1fr; gap: 64px; align-items: center; }
+@media (max-width: 900px) { .hero-inner { grid-template-columns: 1fr; gap: 48px; } }
+
+.hero-eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  font-family: var(--mono);
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  color: var(--accent);
+  background: var(--accent-dim);
+  border: 1px solid rgba(21,94,68,.18);
+  padding: 5px 13px;
+  border-radius: 100px;
+  margin-bottom: 24px;
+}
+.hero-eyebrow::before {
+  content: '';
+  width: 5px; height: 5px;
+  background: var(--accent);
+  border-radius: 50%;
+  box-shadow: 0 0 5px rgba(21,94,68,.5);
+}
+
+.hero h1 {
+  font-family: var(--display);
+  font-size: clamp(3rem, 5.5vw, 4.8rem);
+  font-weight: 500;
+  line-height: 1.07;
+  letter-spacing: -0.02em;
+  color: var(--text);
+  margin-bottom: 24px;
+}
+.hero h1 em {
+  font-style: italic;
+  color: var(--accent);
+}
+.hero-sub {
+  font-size: 17px;
+  font-weight: 400;
+  color: var(--sub);
+  line-height: 1.65;
+  max-width: 480px;
+  margin-bottom: 40px;
+}
+/* #265: Hero counter strip */
+.hero-counters {
+  display: flex; align-items: center; gap: 0;
+  margin-bottom: 24px;
+  padding: 14px 18px;
+  background: rgba(21,94,68,.05);
+  border: 1px solid rgba(21,94,68,.12);
+  border-radius: 10px;
+}
+.hc-item { text-align: center; flex: 1; }
+.hc-val {
+  display: block;
+  font-family: var(--mono);
+  font-size: 1.5rem; font-weight: 600;
+  color: var(--accent); letter-spacing: -.04em; line-height: 1;
+}
+.hc-label {
+  display: block;
+  font-size: 10px; font-weight: 500; letter-spacing: .06em;
+  text-transform: uppercase; color: var(--muted); margin-top: 3px;
+}
+.hc-sep { width: 1px; height: 36px; background: rgba(21,94,68,.15); flex-shrink: 0; }
+
+.hero-actions { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; }
+.btn-primary {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--accent);
+  color: #fff;
+  font-size: 14.5px;
+  font-weight: 600;
+  padding: 13px 28px;
+  border-radius: var(--r-md);
+  text-decoration: none;
+  border: none;
+  cursor: pointer;
+  transition: background var(--t), box-shadow var(--t), transform var(--t);
+  box-shadow: 0 1px 3px rgba(21,94,68,.3), 0 4px 14px rgba(21,94,68,.18);
+}
+.btn-primary:hover {
+  background: var(--accent-hover);
+  box-shadow: 0 2px 8px rgba(21,94,68,.35), 0 8px 24px rgba(21,94,68,.22);
+  transform: translateY(-1px);
+  color: #fff;
+}
+.btn-secondary {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--surface);
+  color: var(--sub);
+  font-size: 14.5px;
+  font-weight: 500;
+  padding: 12px 24px;
+  border-radius: var(--r-md);
+  text-decoration: none;
+  border: 1px solid var(--border);
+  cursor: pointer;
+  transition: all var(--t);
+}
+.btn-secondary:hover { color: var(--text); border-color: var(--border-em); box-shadow: var(--shadow-sm); }
+
+/* ── Hero Visual — App mock ──────────────────────────────────────── */
+.hero-visual { position: relative; }
+.hero-mock {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--r-xl);
+  box-shadow: var(--shadow-xl);
+  overflow: hidden;
+  transform: perspective(800px) rotateY(-3deg) rotateX(1.5deg);
+  transition: transform .4s ease;
+}
+.hero-mock:hover { transform: perspective(800px) rotateY(-1deg) rotateX(.5deg); }
+.mock-titlebar {
+  background: var(--elevated);
+  border-bottom: 1px solid var(--border);
+  padding: 10px 16px;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+}
+.dot-r { width: 9px; height: 9px; border-radius: 50%; background: #FF5F57; }
+.dot-y { width: 9px; height: 9px; border-radius: 50%; background: #FEBC2E; }
+.dot-g { width: 9px; height: 9px; border-radius: 50%; background: #28C840; }
+.mock-url {
+  flex: 1;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 5px;
+  padding: 3px 10px;
+  font-family: var(--mono);
+  font-size: 10px;
+  color: var(--muted);
+  margin: 0 8px;
+}
+.mock-body { padding: 20px; }
+
+.mock-verdict {
+  background: linear-gradient(135deg, rgba(21,94,68,.06) 0%, rgba(21,94,68,.03) 100%);
+  border: 1px solid rgba(21,94,68,.18);
+  border-left: 3px solid var(--accent);
+  border-radius: var(--r-md);
+  padding: 14px 18px;
+  margin-bottom: 16px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.mock-verdict-stamp {
+  background: var(--accent);
+  color: #fff;
+  font-family: var(--mono);
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: .08em;
+  padding: 5px 12px;
+  border-radius: 4px;
+  white-space: nowrap;
+  text-transform: uppercase;
+}
+.mock-verdict-text { font-size: 11.5px; color: var(--sub); line-height: 1.4; }
+.mock-verdict-text strong { color: var(--text); font-weight: 600; }
+
+.mock-metrics {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
+  margin-bottom: 16px;
+}
+.mock-metric {
+  background: var(--elevated);
+  border: 1px solid var(--border);
+  border-radius: var(--r-md);
+  padding: 10px 12px;
+}
+.mock-metric-label { font-size: 9px; color: var(--muted); font-weight: 600; text-transform: uppercase; letter-spacing: .08em; margin-bottom: 4px; }
+.mock-metric-val { font-family: var(--mono); font-size: 15px; font-weight: 600; color: var(--text); letter-spacing: -.02em; }
+.mock-metric-val.green { color: var(--green); }
+.mock-metric-val.red { color: var(--red); }
+
+.mock-advisors {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+}
+.mock-advisor {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--r-md);
+  padding: 10px 12px;
+}
+.mock-advisor-name { font-size: 10px; font-weight: 700; color: var(--text); margin-bottom: 3px; }
+.mock-advisor-title { font-size: 9.5px; color: var(--muted); margin-bottom: 6px; }
+.mock-advisor-score {
+  font-family: var(--mono);
+  font-size: 11px;
+  font-weight: 600;
+  padding: 2px 7px;
+  border-radius: 3px;
+  display: inline-block;
+}
+.score-pass { background: rgba(21,128,61,.1); color: #15803D; }
+.score-warn { background: rgba(146,64,14,.1); color: #92400E; }
+.score-fail { background: rgba(185,28,28,.1); color: #B91C1C; }
+
+/* ── Trust stripe ────────────────────────────────────────────────── */
+.trust-strip {
+  border-top: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
+  background: var(--surface);
+  padding: 28px 0;
+}
+.trust-inner {
+  display: flex;
+  align-items: center;
+  gap: 0;
+  justify-content: space-between;
+  flex-wrap: wrap;
+}
+.trust-stat { text-align: center; flex: 1; min-width: 120px; }
+.trust-stat-val {
+  font-family: var(--mono);
+  font-size: 2.2rem;
+  font-weight: 600;
+  color: var(--accent);
+  letter-spacing: -.04em;
+  line-height: 1;
+  display: block;
+}
+.trust-stat-label {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: .07em;
+  margin-top: 6px;
+  display: block;
+}
+.trust-divider { width: 1px; height: 44px; background: var(--border); }
+
+/* ── Features ────────────────────────────────────────────────────── */
+.features { padding: 96px 0; }
+.section-eyebrow {
+  font-family: var(--mono);
+  font-size: 10.5px;
+  font-weight: 500;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin-bottom: 14px;
+  display: block;
+}
+.section-h2 {
+  font-family: var(--display);
+  font-size: clamp(2rem, 4vw, 3rem);
+  font-weight: 500;
+  line-height: 1.12;
+  letter-spacing: -0.02em;
+  color: var(--text);
+  margin-bottom: 16px;
+}
+.section-sub {
+  font-size: 16px;
+  color: var(--sub);
+  max-width: 560px;
+  line-height: 1.65;
+}
+
+.features-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 24px;
+  margin-top: 56px;
+}
+@media (max-width: 900px) { .features-grid { grid-template-columns: 1fr 1fr; } }
+@media (max-width: 600px) { .features-grid { grid-template-columns: 1fr; } }
+
+.feat-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--r-lg);
+  padding: 28px;
+  transition: box-shadow var(--t), border-color var(--t), transform var(--t);
+}
+.feat-card:hover {
+  box-shadow: var(--shadow-md);
+  border-color: rgba(21,94,68,.25);
+  transform: translateY(-2px);
+}
+.feat-icon {
+  width: 40px;
+  height: 40px;
+  background: var(--accent-dim);
+  border: 1px solid rgba(21,94,68,.15);
+  border-radius: var(--r-md);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  margin-bottom: 18px;
+}
+.feat-title {
+  font-family: var(--display);
+  font-size: 19px;
+  font-weight: 600;
+  color: var(--text);
+  letter-spacing: -0.01em;
+  margin-bottom: 10px;
+  line-height: 1.25;
+}
+.feat-desc { font-size: 14px; color: var(--sub); line-height: 1.65; }
+
+/* ── How it works ────────────────────────────────────────────────── */
+.how { padding: 96px 0; background: var(--surface); border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); }
+.how-steps {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 40px;
+  margin-top: 56px;
+  position: relative;
+}
+.how-steps::before {
+  content: '';
+  position: absolute;
+  top: 20px;
+  left: calc(16.67% + 12px);
+  right: calc(16.67% + 12px);
+  height: 1px;
+  background: linear-gradient(90deg, var(--accent-mid), transparent 50%, var(--accent-mid));
+}
+@media (max-width: 700px) { .how-steps { grid-template-columns: 1fr; } .how-steps::before { display: none; } }
+
+.how-step { text-align: center; }
+.how-step-num {
+  width: 40px;
+  height: 40px;
+  background: var(--accent);
+  color: #fff;
+  border-radius: 50%;
+  font-family: var(--mono);
+  font-size: 14px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 20px;
+  position: relative;
+  z-index: 1;
+}
+.how-step-title {
+  font-family: var(--display);
+  font-size: 21px;
+  font-weight: 600;
+  color: var(--text);
+  letter-spacing: -0.01em;
+  margin-bottom: 10px;
+}
+.how-step-desc { font-size: 14px; color: var(--sub); line-height: 1.65; max-width: 240px; margin: 0 auto; }
+
+/* ── Testimonials ────────────────────────────────────────────────── */
+.testimonials { padding: 96px 0; }
+.testimonials-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 24px;
+  margin-top: 56px;
+}
+@media (max-width: 900px) { .testimonials-grid { grid-template-columns: 1fr 1fr; } }
+@media (max-width: 600px) { .testimonials-grid { grid-template-columns: 1fr; } }
+
+.testi-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--r-lg);
+  padding: 28px;
+  box-shadow: var(--shadow-xs);
+}
+.testi-stars {
+  color: var(--accent);
+  font-size: 13px;
+  letter-spacing: 2px;
+  margin-bottom: 16px;
+}
+.testi-quote {
+  font-family: var(--display);
+  font-size: 17px;
+  font-weight: 400;
+  font-style: italic;
+  color: var(--text);
+  line-height: 1.55;
+  margin-bottom: 20px;
+}
+.testi-author { font-size: 13px; font-weight: 600; color: var(--sub); }
+.testi-role { font-size: 12px; color: var(--muted); margin-top: 2px; }
+
+/* ── CTA Banner ──────────────────────────────────────────────────── */
+.cta-banner {
+  padding: 96px 0;
+  background: var(--accent);
+  position: relative;
+  overflow: hidden;
+}
+.cta-banner::before {
+  content: '';
+  position: absolute;
+  top: -50%;
+  right: -10%;
+  width: 600px;
+  height: 600px;
+  background: radial-gradient(circle, rgba(255,255,255,.06) 0%, transparent 65%);
+  pointer-events: none;
+}
+.cta-inner { text-align: center; position: relative; z-index: 1; }
+.cta-h2 {
+  font-family: var(--display);
+  font-size: clamp(2.2rem, 4vw, 3.4rem);
+  font-weight: 500;
+  font-style: italic;
+  color: #fff;
+  line-height: 1.1;
+  letter-spacing: -0.02em;
+  margin-bottom: 18px;
+}
+.cta-sub { font-size: 17px; color: rgba(255,255,255,.75); margin-bottom: 40px; max-width: 480px; margin-left: auto; margin-right: auto; }
+.btn-cta-white {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  background: #fff;
+  color: var(--accent);
+  font-size: 15px;
+  font-weight: 700;
+  padding: 14px 32px;
+  border-radius: var(--r-md);
+  text-decoration: none;
+  transition: box-shadow var(--t), transform var(--t);
+  box-shadow: 0 2px 8px rgba(0,0,0,.15);
+}
+.btn-cta-white:hover {
+  box-shadow: 0 4px 20px rgba(0,0,0,.2);
+  transform: translateY(-2px);
+  color: var(--accent);
+}
+
+/* ── Footer ──────────────────────────────────────────────────────── */
+.footer {
+  background: var(--text);
+  padding: 56px 0 36px;
+  color: rgba(255,255,255,.5);
+}
+.footer-inner {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 40px;
+  flex-wrap: wrap;
+  margin-bottom: 48px;
+}
+.footer-brand {
+  font-family: var(--display);
+  font-size: 22px;
+  font-weight: 600;
+  color: #fff;
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  text-decoration: none;
+  margin-bottom: 10px;
+}
+.footer-desc { font-size: 13px; max-width: 260px; line-height: 1.65; }
+.footer-col-title { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .1em; color: rgba(255,255,255,.35); margin-bottom: 14px; }
+.footer-links { list-style: none; display: flex; flex-direction: column; gap: 9px; }
+.footer-links a { color: rgba(255,255,255,.55); font-size: 13.5px; text-decoration: none; transition: color var(--t); }
+.footer-links a:hover { color: #fff; }
+.footer-bottom { border-top: 1px solid rgba(255,255,255,.08); padding-top: 28px; font-size: 12px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px; }
+.footer-bottom a { color: rgba(255,255,255,.4); text-decoration: none; }
+
+/* ── Utility ─────────────────────────────────────────────────────── */
+.text-center { text-align: center; }
+.mt-0 { margin-top: 0 !important; }
+</style>
+</head>
+<body>
+
+<!-- ── Navbar ──────────────────────────────────────────────────────── -->
+<nav class="nav">
+  <a class="nav-brand" href="/">
+    <div class="nav-brand-eye">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="12" cy="12" r="4"/><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+      </svg>
+    </div>
+    ClearEye
+  </a>
+  <div class="nav-links">
+    <a class="nav-link" href="/markets">Markets</a>
+    <a class="nav-link" href="/find-deals">Find Deals</a>
+    <a class="nav-link" href="/pipeline">Pipeline</a>
+    <a class="nav-link" href="/pricing">Pricing</a>
+  </div>
+  <div class="nav-right">
+    <a class="nav-btn-ghost" href="/login">Sign In</a>
+    <a class="nav-btn-primary" href="/app">Analyze a Deal &rarr;</a>
+  </div>
+</nav>
+
+<!-- ── Hero ─────────────────────────────────────────────────────────── -->
+<section class="hero">
+  <div class="container">
+    <div class="hero-inner">
+      <!-- Copy -->
+      <div>
+        <div class="hero-eyebrow">AI-Powered Underwriting</div>
+        <h1>Underwrite deals.<br><em>Not guesses.</em></h1>
+        <p class="hero-sub">ClearEye runs every offering memorandum through five specialist AI advisors — giving you institutional-grade analysis in seconds, not weeks.</p>
+        <!-- #265: Animated metric counter strip -->
+        <div class="hero-counters" id="hero-counters">
+          <div class="hc-item">
+            <span class="hc-val" data-target="265" data-suffix="+">0</span>
+            <span class="hc-label">Features Shipped</span>
+          </div>
+          <div class="hc-sep"></div>
+          <div class="hc-item">
+            <span class="hc-val" data-target="5" data-suffix="">0</span>
+            <span class="hc-label">AI Advisors</span>
+          </div>
+          <div class="hc-sep"></div>
+          <div class="hc-item">
+            <span class="hc-val" data-target="90" data-prefix="&lt;" data-suffix="s">0</span>
+            <span class="hc-label">Analysis Time</span>
+          </div>
+          <div class="hc-sep"></div>
+          <div class="hc-item">
+            <span class="hc-val" data-target="30" data-suffix="+ MSAs">0</span>
+            <span class="hc-label">Markets Covered</span>
+          </div>
+        </div>
+
+        <div class="hero-actions">
+          <a class="btn-primary" href="/app">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+            Analyze Free Deal
+          </a>
+          <a class="btn-secondary" href="#features">
+            See How It Works
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="m9 18 6-6-6-6"/></svg>
+          </a>
+        </div>
+      </div>
+
+      <!-- Mock app screenshot -->
+      <div class="hero-visual">
+        <div class="hero-mock">
+          <div class="mock-titlebar">
+            <div class="dot-r"></div>
+            <div class="dot-y"></div>
+            <div class="dot-g"></div>
+            <div class="mock-url">cleareye.ai/report/sunset-ridge-240u</div>
+          </div>
+          <div class="mock-body">
+            <div class="mock-verdict">
+              <div class="mock-verdict-stamp">PROCEED</div>
+              <div class="mock-verdict-text"><strong>Consensus: 72/100</strong> — 4 of 5 advisors recommend further diligence. Cap rate spread vs. market: +38 bps.</div>
+            </div>
+            <div class="mock-metrics">
+              <div class="mock-metric">
+                <div class="mock-metric-label">Proj. IRR</div>
+                <div class="mock-metric-val green">17.4%</div>
+              </div>
+              <div class="mock-metric">
+                <div class="mock-metric-label">Cap Rate</div>
+                <div class="mock-metric-val">5.62%</div>
+              </div>
+              <div class="mock-metric">
+                <div class="mock-metric-label">Price/Unit</div>
+                <div class="mock-metric-val">$187k</div>
+              </div>
+              <div class="mock-metric">
+                <div class="mock-metric-label">Bias Score</div>
+                <div class="mock-metric-val red">High</div>
+              </div>
+            </div>
+            <div class="mock-advisors">
+              <div class="mock-advisor">
+                <div class="mock-advisor-name">Marcus</div>
+                <div class="mock-advisor-title">Deal Structuring</div>
+                <div class="mock-advisor-score score-pass">PASS 81</div>
+              </div>
+              <div class="mock-advisor">
+                <div class="mock-advisor-name">Diana</div>
+                <div class="mock-advisor-title">Risk Analysis</div>
+                <div class="mock-advisor-score score-warn">CAUTION 63</div>
+              </div>
+              <div class="mock-advisor">
+                <div class="mock-advisor-name">Bobby</div>
+                <div class="mock-advisor-title">Market Intel</div>
+                <div class="mock-advisor-score score-pass">PASS 74</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── Trust strip ───────────────────────────────────────────────────── -->
+<div class="trust-strip">
+  <div class="container">
+    <div class="trust-inner">
+      <div class="trust-stat">
+        <span class="trust-stat-val">250+</span>
+        <span class="trust-stat-label">Features Shipped</span>
+      </div>
+      <div class="trust-divider"></div>
+      <div class="trust-stat">
+        <span class="trust-stat-val">5</span>
+        <span class="trust-stat-label">AI Advisors</span>
+      </div>
+      <div class="trust-divider"></div>
+      <div class="trust-stat">
+        <span class="trust-stat-val">&lt;60s</span>
+        <span class="trust-stat-label">Full Analysis</span>
+      </div>
+      <div class="trust-divider"></div>
+      <div class="trust-stat">
+        <span class="trust-stat-val">30+</span>
+        <span class="trust-stat-label">MSA Markets</span>
+      </div>
+      <div class="trust-divider"></div>
+      <div class="trust-stat">
+        <span class="trust-stat-val">Free</span>
+        <span class="trust-stat-label">To Start</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ── Features ─────────────────────────────────────────────────────── -->
+<section class="features" id="features">
+  <div class="container">
+    <div class="text-center">
+      <span class="section-eyebrow">What ClearEye Does</span>
+      <h2 class="section-h2" style="margin: 0 auto 16px;">Every angle. Every time.</h2>
+      <p class="section-sub" style="margin: 0 auto;">Five specialist AI advisors scrutinize your deal from deal structure to market comps, bias detection to LP analytics — all in one place.</p>
+    </div>
+    <div class="features-grid">
+      <div class="feat-card">
+        <div class="feat-icon">&#128065;</div>
+        <div class="feat-title">5-Advisor Council</div>
+        <p class="feat-desc">Marcus (structures), Diana (risk), Bobby (market), PropTech Scout & GTM Lens each score the deal independently, then a consensus verdict is computed.</p>
+      </div>
+      <div class="feat-card">
+        <div class="feat-icon">&#9878;</div>
+        <div class="feat-title">Bias Detection</div>
+        <p class="feat-desc">Catch optimistic rent projections, underestimated vacancy, missing CapEx reserves, and 12 other common OM inflations before you wire earnest money.</p>
+      </div>
+      <div class="feat-card">
+        <div class="feat-icon">&#128202;</div>
+        <div class="feat-title">Live Market Comps</div>
+        <p class="feat-desc">Benchmark against real CoStar/RealPage 2024 data across 30+ MSAs. See cap rate spreads, PPU comparables, and IRR deltas against the median.</p>
+      </div>
+      <div class="feat-card">
+        <div class="feat-icon">&#128196;</div>
+        <div class="feat-title">Shareable Reports</div>
+        <p class="feat-desc">One click generates a white-label investment memo you can share with your LP base, co-investors, or lender via a secure link — no login required for viewers.</p>
+      </div>
+      <div class="feat-card">
+        <div class="feat-icon">&#128203;</div>
+        <div class="feat-title">Deal Pipeline</div>
+        <p class="feat-desc">Drag deals through your custom Kanban stages, track diligence progress, set automated alerts for new deals matching your buy box in any market.</p>
+      </div>
+      <div class="feat-card">
+        <div class="feat-icon">&#9889;</div>
+        <div class="feat-title">Quick Kill Screen</div>
+        <p class="feat-desc">Paste any OM and get a 30-second pre-screen. Deal-breaker flags surface immediately so you don't spend 20 minutes on a deal that fails in 10 seconds.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── How it works ───────────────────────────────────────────────────── -->
+<section class="how" id="how-it-works">
+  <div class="container">
+    <div class="text-center">
+      <span class="section-eyebrow">Process</span>
+      <h2 class="section-h2" style="margin: 0 auto 16px;">From OM to verdict in&nbsp;<em style="font-style:italic;color:var(--accent);">60 seconds</em></h2>
+      <p class="section-sub" style="margin: 0 auto;">No setup. No integrations. Paste or upload and go.</p>
+    </div>
+    <div class="how-steps">
+      <div class="how-step">
+        <div class="how-step-num">1</div>
+        <div class="how-step-title">Paste Your OM</div>
+        <p class="how-step-desc">Copy-paste the offering memo text, upload a PDF, or drop in a LoopNet/Crexi URL. ClearEye extracts all deal parameters automatically.</p>
+      </div>
+      <div class="how-step">
+        <div class="how-step-num">2</div>
+        <div class="how-step-title">Advisors Convene</div>
+        <p class="how-step-desc">Five specialist advisors analyze simultaneously — deal structure, market position, risk flags, bias markers, and exit scenarios.</p>
+      </div>
+      <div class="how-step">
+        <div class="how-step-num">3</div>
+        <div class="how-step-title">Act on Intelligence</div>
+        <p class="how-step-desc">Review the consensus verdict, download the memo, add to your pipeline, or share the report link with your investment committee.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── Testimonials ───────────────────────────────────────────────────── -->
+<section class="testimonials">
+  <div class="container">
+    <div class="text-center">
+      <span class="section-eyebrow">Early Feedback</span>
+      <h2 class="section-h2" style="margin: 0 auto;">What investors are saying</h2>
+    </div>
+    <div class="testimonials-grid">
+      <div class="testi-card">
+        <div class="testi-stars">&#9733;&#9733;&#9733;&#9733;&#9733;</div>
+        <p class="testi-quote">"ClearEye caught a 14% rent-growth assumption on a C-class asset in Memphis. Would have walked into that one blind."</p>
+        <div class="testi-author">Marcus T.</div>
+        <div class="testi-role">LP Investor, 40-unit portfolio</div>
+      </div>
+      <div class="testi-card">
+        <div class="testi-stars">&#9733;&#9733;&#9733;&#9733;&#9733;</div>
+        <p class="testi-quote">"The shareable report feature alone is worth it. Sending LP memo links instead of PDFs has changed how we communicate deals."</p>
+        <div class="testi-author">Diana R.</div>
+        <div class="testi-role">Syndicator, Value-Add Strategy</div>
+      </div>
+      <div class="testi-card">
+        <div class="testi-stars">&#9733;&#9733;&#9733;&#9733;&#9733;</div>
+        <p class="testi-quote">"I screen 3x more deals now. The 30-second kill screen eliminates the obvious no's before I even open a spreadsheet."</p>
+        <div class="testi-author">Bobby K.</div>
+        <div class="testi-role">Acquisitions Analyst</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── CTA Banner ─────────────────────────────────────────────────────── -->
+<section class="cta-banner">
+  <div class="container">
+    <div class="cta-inner">
+      <h2 class="cta-h2">Ready to see what your next<br>deal is actually worth?</h2>
+      <p class="cta-sub">Free to start. No credit card. Your first analysis takes 60 seconds.</p>
+      <a class="btn-cta-white" href="/app">
+        Run Your First Analysis
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg>
+      </a>
+    </div>
+  </div>
+</section>
+
+<!-- ── Footer ─────────────────────────────────────────────────────────── -->
+<footer class="footer">
+  <div class="container">
+    <div class="footer-inner">
+      <div>
+        <a class="footer-brand" href="/">
+          <div style="width:26px;height:26px;background:var(--accent);border-radius:6px;display:flex;align-items:center;justify-content:center;">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/></svg>
+          </div>
+          ClearEye
+        </a>
+        <p class="footer-desc">Real estate investment intelligence powered by AI. Underwrite faster. Invest smarter.</p>
+      </div>
+      <div>
+        <div class="footer-col-title">Product</div>
+        <ul class="footer-links">
+          <li><a href="/app">Analyze a Deal</a></li>
+          <li><a href="/markets">Market Data</a></li>
+          <li><a href="/pipeline">Deal Pipeline</a></li>
+          <li><a href="/find-deals">Find Deals</a></li>
+        </ul>
+      </div>
+      <div>
+        <div class="footer-col-title">Company</div>
+        <ul class="footer-links">
+          <li><a href="/pricing">Pricing</a></li>
+          <li><a href="/login">Sign In</a></li>
+          <li><a href="/deals">Deal History</a></li>
+          <li><a href="/bulk">Bulk Upload</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <span>&copy; 2026 ClearEye. Real estate investment intelligence.</span>
+      <a href="/pricing">Pricing</a>
+    </div>
+  </div>
+</footer>
+
+<!-- #265: Animated counter strip -->
+<script>
+(function(){
+  function easeOut(t){ return 1 - Math.pow(1 - t, 3); }
+  function runCounters(){
+    var els = document.querySelectorAll('.hc-val[data-target]');
+    var duration = 1200;
+    var start = null;
+    function step(ts){
+      if(!start) start = ts;
+      var progress = Math.min((ts - start) / duration, 1);
+      var ease = easeOut(progress);
+      els.forEach(function(el){
+        var target = parseInt(el.getAttribute('data-target'), 10);
+        var prefix = el.getAttribute('data-prefix') || '';
+        var suffix = el.getAttribute('data-suffix') || '';
+        el.innerHTML = prefix + Math.round(ease * target) + suffix;
+      });
+      if(progress < 1) requestAnimationFrame(step);
+    }
+    requestAnimationFrame(step);
+  }
+  // Trigger when the counter strip enters the viewport
+  var counters = document.getElementById('hero-counters');
+  if(!counters){ return; }
+  if('IntersectionObserver' in window){
+    var obs = new IntersectionObserver(function(entries){
+      if(entries[0].isIntersecting){ runCounters(); obs.disconnect(); }
+    }, { threshold: 0.3 });
+    obs.observe(counters);
+  } else {
+    runCounters();
+  }
+})();
+</script>
+
+</body>
+</html>
