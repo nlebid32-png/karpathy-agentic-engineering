@@ -410,7 +410,7 @@ app.secret_key = (
 
 @app.route("/api/waitlist", methods=["POST"])
 def api_waitlist():
-    """Append email to waitlist JSONL (#203)."""
+    """Append email to waitlist JSONL and send confirmation email (#203, #280)."""
     data = request.get_json(force=True, silent=True) or {}
     email = (data.get("email") or "").strip().lower()
     if not email or "@" not in email:
@@ -418,9 +418,49 @@ def api_waitlist():
     wl_path = os.path.join(os.path.dirname(__file__), "outputs", "waitlist.jsonl")
     import json as _j
     entry = _j.dumps({"email": email, "ts": datetime.utcnow().isoformat(), "source": "landing_hero"})
-    with open(wl_path, "a", encoding="utf-8") as fh:
-        fh.write(entry + "\n")
+    try:
+        os.makedirs(os.path.dirname(wl_path), exist_ok=True)
+        with open(wl_path, "a", encoding="utf-8") as fh:
+            fh.write(entry + "\n")
+    except Exception:
+        pass
+    # #280: Send immediate confirmation email if Gmail is configured
+    try:
+        _send_waitlist_confirm(email)
+    except Exception:
+        pass
     return jsonify({"ok": True, "message": "You're on the list — we'll be in touch."})
+
+
+def _send_waitlist_confirm(email: str):
+    """Send branded confirmation email to new waitlist signups (#280)."""
+    app_url = os.environ.get("APP_URL", "http://localhost:5052")
+    try:
+        from email_delivery import _send_email
+        html = (
+            "<!DOCTYPE html><html><head><meta charset='UTF-8'></head>"
+            "<body style='margin:0;padding:0;background:#F5F3EE;font-family:\"Plus Jakarta Sans\",Arial,sans-serif;'>"
+            "<table width='100%' cellpadding='0' cellspacing='0' style='background:#F5F3EE;padding:32px 16px;'>"
+            "<tr><td align='center'><table width='560' cellpadding='0' cellspacing='0' style='max-width:560px;width:100%;'>"
+            "<tr><td style='background:#155E44;border-radius:12px 12px 0 0;padding:22px 28px;'>"
+            "<span style='font-size:17px;font-weight:700;color:#FFFFFF;'>&#128065; ClearEye</span>"
+            "</td></tr>"
+            "<tr><td style='background:#FFFFFF;padding:28px 28px 20px;border:1px solid #EAE7E1;border-top:none;'>"
+            "<div style='font-size:11px;font-weight:600;letter-spacing:.08em;color:#155E44;text-transform:uppercase;margin-bottom:10px;'>You're on the list</div>"
+            "<h1 style='margin:0 0 12px;font-size:22px;font-weight:700;color:#0D1926;letter-spacing:-0.3px;'>Welcome to ClearEye.</h1>"
+            "<p style='margin:0 0 16px;font-size:14px;color:#4A5568;line-height:1.65;'>ClearEye runs every offering memorandum through a 5-advisor AI council and delivers a Go/No-Go verdict in 90 seconds — saving you hours of manual underwriting per deal.</p>"
+            "<p style='margin:0 0 20px;font-size:14px;color:#4A5568;line-height:1.65;'>In the meantime, <strong>your first 3 analyses are completely free</strong> — no account required.</p>"
+            "<a href='" + app_url + "/app' style='display:inline-block;background:#155E44;color:#FFFFFF;text-decoration:none;font-size:13px;font-weight:600;padding:11px 24px;border-radius:8px;'>Analyze your first deal now &rarr;</a>"
+            "</td></tr>"
+            "<tr><td style='background:#F0EDE7;border:1px solid #EAE7E1;border-top:none;border-radius:0 0 12px 12px;padding:14px 28px;'>"
+            "<p style='margin:0;font-size:11px;color:#9CA3AF;'>You joined the ClearEye waitlist. "
+            "<a href='" + app_url + "' style='color:#6B7280;text-decoration:underline;'>Unsubscribe</a></p>"
+            "</td></tr>"
+            "</table></td></tr></table></body></html>"
+        )
+        _send_email(email, "You're on the ClearEye waitlist — analyze your first deal free", html)
+    except Exception:
+        pass
 
 
 @app.route("/login", methods=["GET"])
@@ -5808,6 +5848,14 @@ HTML = """<!DOCTYPE html>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>ClearEye — Real Estate Investment Intelligence</title>
+<meta name="description" content="AI-powered real estate deal analysis. Five advisors, one verdict, 90 seconds. Free to start.">
+<!-- OpenGraph (#276) — dynamic in report mode via JS document.title update -->
+<meta property="og:type" content="website">
+<meta property="og:title" content="ClearEye — AI Deal Analysis in 90 Seconds">
+<meta property="og:description" content="Five AI advisors underwrite your real estate deal and deliver a Go/No-Go verdict in 90 seconds. Free to start.">
+<meta property="og:url" content="https://cleareye.ai">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="ClearEye — AI Deal Analysis in 90 Seconds">
 <!-- Fonts — Cormorant Garamond + Plus Jakarta Sans + JetBrains Mono -->
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -7853,7 +7901,7 @@ select {
 
         <!-- Primary: clean textarea -->
         <textarea id="om_input" class="form-control mb-2" rows="11"
-          placeholder="Paste offering memorandum text here...&#10;&#10;Ctrl+Enter to analyze"
+          placeholder="Paste offering memorandum text here...&#10;&#10;Cmd+Enter (Mac) or Ctrl+Enter to analyze"
           onkeydown="handleKey(event)" oninput="checkInput();_qsSchedule()"></textarea>
 
         <!-- Secondary input options as text links -->
@@ -7976,6 +8024,11 @@ select {
       <button class="btn-ghost" onclick="loadDemoAndRun()" style="margin-top:16px;font-size:12px;">
         &#9654;&nbsp; Try a Demo Deal (Sunset Ridge, Phoenix)
       </button>
+      <!-- #277: Recent analyses social proof -->
+      <div id="recent-analyses-strip" style="margin-top:20px;display:none;">
+        <div style="font-size:9px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--text-muted);font-family:var(--mono);margin-bottom:8px;">Recently analyzed</div>
+        <div id="recent-analyses-chips" style="display:flex;flex-wrap:wrap;gap:6px;justify-content:center;"></div>
+      </div>
     </div>
 
     <!-- Skeleton loading state (#iter3) — shown during analysis, before results arrive -->
@@ -8447,6 +8500,33 @@ function _injectReportChrome(job){
   const ts=new Date().toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});
   const rp=document.getElementById('results-panel');
   if(!rp)return;
+
+  // #278: Deal snapshot card — first thing LP sees when opening a shared report
+  (function(){
+    const memo=(job.memo||'');
+    let vLabel='CONDITIONAL',vCls='vs-cond',vBg='rgba(146,64,14,.05)',vBorder='rgba(146,64,14,.25)';
+    const mu=memo.toUpperCase();
+    if(mu.includes('NO-GO')){vLabel='NO-GO';vCls='vs-nogo';vBg='rgba(185,28,28,.05)';vBorder='rgba(185,28,28,.25)';}
+    else if(/\\bGO\\b/.test(mu)&&!mu.includes('CONDITIONAL')){vLabel='GO';vCls='vs-go';vBg='rgba(21,128,61,.05)';vBorder='rgba(21,128,61,.25)';}
+    const rMatch=memo.match(/REASON[:\\s]+([^\\n]+)/i)||memo.match(/KILL SHOT[:\\s\\n]+([^\\n]+)/i);
+    const reason=(rMatch&&rMatch[1]?rMatch[1].trim().slice(0,160):'');
+    const price=deal.asking_price?'$'+Number(deal.asking_price).toLocaleString():'';
+    const market=deal.market||deal.location||'';
+    const snap=document.createElement('div');
+    snap.className='deal-snapshot-card';
+    snap.style.cssText='margin-bottom:20px;padding:18px 22px;background:'+vBg+';border:1px solid '+vBorder+';border-radius:12px;';
+    snap.innerHTML=
+      '<div style="display:flex;align-items:flex-start;justify-content:space-between;gap:16px;flex-wrap:wrap;">'
+      +'<div>'
+      +'<div style="font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--text-muted);font-family:var(--mono);margin-bottom:6px;">Investment Analysis</div>'
+      +'<div style="font-family:var(--font-display);font-style:italic;font-size:1.5rem;font-weight:400;color:var(--text-primary);margin-bottom:4px;">'+esc(dealName)+'</div>'
+      +(market||price?'<div style="font-family:var(--mono);font-size:11px;color:var(--text-muted);">'+(market?esc(market):'')+(market&&price?' &middot; ':' ')+(price?price:'')+'</div>':'')
+      +(reason?'<div style="font-size:12px;color:var(--text-secondary);margin-top:8px;line-height:1.55;max-width:420px;">'+esc(reason)+'</div>':'')
+      +'</div>'
+      +'<div class="verdict-stamp '+vCls+'" style="font-size:1.6rem;flex-shrink:0;">'+vLabel+'</div>'
+      +'</div>';
+    rp.insertBefore(snap,rp.firstChild);
+  })();
   // #226: Load branding from URL params (for LP viewers) or localStorage (for owner)
   const _urlP=new URLSearchParams(window.location.search);
   const _fnP=_urlP.get('fn')||''; const _loP=_urlP.get('lo')||''; const _acP=_urlP.get('ac')||''; const _hbP=_urlP.get('hb')==='1';
@@ -12072,6 +12152,28 @@ if(window._reportMode){document.body.classList.add('report-mode');}
 _loadHistFilters(); // Restore persisted filters (#195)
 renderHist();
 loadQuotaWidget();
+// #277: Load recent analyses for social proof in empty state
+(async function(){
+  try{
+    const r=await fetch('/api/deals/history?limit=5');
+    const deals=await r.json();
+    if(!Array.isArray(deals)||!deals.length)return;
+    const strip=document.getElementById('recent-analyses-strip');
+    const chips=document.getElementById('recent-analyses-chips');
+    if(!strip||!chips)return;
+    chips.innerHTML=deals.slice(0,5).map(function(d){
+      const v=(d.verdict||'CONDITIONAL').toUpperCase();
+      const col=v==='GO'?'var(--green)':v==='NO-GO'?'var(--red)':'var(--amber)';
+      const bg=v==='GO'?'rgba(21,128,61,.06)':v==='NO-GO'?'rgba(185,28,28,.06)':'rgba(146,64,14,.06)';
+      const name=(d.deal_name||'Deal').slice(0,22)+(d.deal_name&&d.deal_name.length>22?'…':'');
+      return '<div style="display:inline-flex;align-items:center;gap:6px;padding:4px 10px;background:'+bg+';border:1px solid '+col+'40;border-radius:99px;font-size:11px;">'
+        +'<span style="color:'+col+';font-weight:700;font-family:var(--mono);font-size:9px;">'+v+'</span>'
+        +'<span style="color:var(--text-secondary);">'+esc(name)+'</span>'
+        +'</div>';
+    }).join('');
+    strip.style.display='block';
+  }catch(e){}
+})();
 // #226/#238: Apply saved brand to Tools trigger; show active dot if IPS/Thesis configured
 (function(){
   const b=wlLoad();
