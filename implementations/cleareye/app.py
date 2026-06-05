@@ -7921,8 +7921,9 @@ select {
         <!-- #253: Quick-scan deal-breaker badges -->
         <div id="qs-badges" style="display:none;margin-bottom:8px;"></div>
         <div id="missing-warn" style="display:none;font-size:11px;color:#d29922;margin-bottom:6px;padding:4px 8px;background:rgba(210,153,34,.08);border-radius:4px;border-left:2px solid #d29922;"></div>
-        <div id="quota-warn-banner" style="display:none;font-size:11px;color:#d29922;margin-bottom:6px;padding:6px 10px;background:rgba(210,153,34,.08);border:1px solid rgba(210,153,34,.3);border-radius:5px;">
-          &#9888; You have <strong>1 analysis</strong> remaining this month. <a href="/pricing" style="color:#d29922;font-weight:600;">Upgrade for more &rarr;</a>
+        <div id="quota-warn-banner" style="display:none;font-size:12px;margin-bottom:8px;padding:10px 14px;background:rgba(21,94,68,.05);border:1px solid rgba(21,94,68,.2);border-radius:7px;display:flex;align-items:center;justify-content:space-between;gap:10px;">
+          <span>&#9889; <strong>Last analysis</strong> this month — upgrade to keep going</span>
+          <a href="/pricing" style="font-size:11px;font-weight:700;color:var(--accent);text-decoration:none;white-space:nowrap;flex-shrink:0;">See plans &rarr;</a>
         </div>
 
         <!-- Demo hint — smaller, secondary -->
@@ -8545,8 +8546,13 @@ function _injectReportChrome(job){
   if(_hideBadge&&_firmName){
     ftr.innerHTML='<span style="font-size:11px;color:var(--text-muted);">'+esc(_firmName)+' &mdash; Investment Analysis</span><span>'+ts+'</span>';
   }else{
-    ftr.innerHTML='<span><span class="report-brand"><span class="report-brand-logo">&#128065; ClearEye</span> &mdash; Real Estate Investment Intelligence</span></span>'
-      +'<span>Powered by <a href="/app">ClearEye AI</a> &middot; <a href="/pricing">Get full access &rarr;</a></span>';
+    // #273: Viral acquisition footer — turns every shared report into a lead
+    const _utmUrl='/?utm_source=report&utm_medium=share&utm_campaign=viral';
+    ftr.innerHTML='<span><span class="report-brand"><span class="report-brand-logo">&#128065; ClearEye</span></span></span>'
+      +'<span style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;">'
+      +'<span style="font-size:11px;color:var(--text-muted);">This analysis took 90 seconds.</span>'
+      +'<a href="'+_utmUrl+'" style="display:inline-flex;align-items:center;gap:5px;padding:6px 13px;background:var(--accent);color:#fff;border-radius:6px;font-size:11px;font-weight:600;text-decoration:none;letter-spacing:.01em;">Try ClearEye free &rarr;</a>'
+      +'</span>';
   }
   rp.appendChild(ftr);
   // LP portal referral CTA banner (#214) — visible when viewing a shared LP link
@@ -9313,7 +9319,27 @@ async function startAnalyze(){
   try{
     const r=await fetch('/analyze',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({om_text:txt,email:email})});
     const {job_id,error}=await r.json();
-    if(error){setStatus('Error: '+error);document.getElementById('analyzeBtn').disabled=false;return;}
+    if(error){
+      document.getElementById('analyzeBtn').disabled=false;
+      document.getElementById('prog').style.display='none';
+      document.getElementById('results-skeleton').style.display='none';
+      // #274: Show upgrade prompt when quota is exceeded
+      if(error.toLowerCase().includes('quota')||error.toLowerCase().includes('limit')){
+        document.getElementById('empty-state').style.display='block';
+        document.getElementById('empty-state').innerHTML=
+          '<div style="max-width:420px;margin:0 auto;padding:32px 20px;text-align:center;">'
+          +'<div style="font-size:2rem;margin-bottom:16px;">&#128202;</div>'
+          +'<div style="font-family:var(--font-display);font-style:italic;font-size:1.4rem;font-weight:400;margin-bottom:10px;color:var(--text-primary);">You\'ve used all your free analyses.</div>'
+          +'<div style="font-size:13px;color:var(--text-secondary);margin-bottom:20px;line-height:1.65;">ClearEye Professional unlocks unlimited analyses, LP sharing, deal alerts, and the full pipeline board — for teams that look at deals seriously.</div>'
+          +'<a href="/pricing" style="display:inline-flex;align-items:center;gap:6px;padding:11px 24px;background:var(--accent);color:#fff;border-radius:8px;font-size:13px;font-weight:700;text-decoration:none;">See pricing — start free &rarr;</a>'
+          +'<div style="margin-top:14px;font-size:11px;color:var(--text-muted);">Or wait until next month for your quota to reset.</div>'
+          +'</div>';
+      }else{
+        setStatus('Error: '+error);
+        document.getElementById('empty-state').style.display='block';
+      }
+      return;
+    }
     window._currentJobId=job_id;
     // Try SSE first, fall back to polling
     if(typeof EventSource!=='undefined'){
@@ -12159,6 +12185,25 @@ if(new URLSearchParams(location.search).get('preload')==='1'){
     document.getElementById('om_input').focus();
   }
 }
+
+// #272: Auto-run demo on ?demo=1 — first-time visitor sees a full analysis in 90s
+// #275: Also auto-run on first ever visit (no ce_visited key in localStorage)
+(function(){
+  const p=new URLSearchParams(location.search);
+  const isDemo=p.get('demo')==='1';
+  const isFirstVisit=!localStorage.getItem('ce_visited')&&!window._reportMode;
+  if(!isDemo&&!isFirstVisit)return;
+  // Mark as visited so this only fires once
+  try{localStorage.setItem('ce_visited','1');}catch(e){}
+  // Only auto-run if no analysis in progress and no current results
+  if(document.getElementById('results')&&document.getElementById('results').style.display==='block')return;
+  setStatus('Loading a sample deal analysis...');
+  setTimeout(function(){
+    if(typeof loadDemoAndRun==='function'){
+      loadDemoAndRun();
+    }
+  }, 1200);
+})();
 </script>
 </body>
 </html>"""
@@ -15865,13 +15910,15 @@ document.addEventListener('click',e=>{
 
 if __name__ == "__main__":
     import socket
+    # #271: Use PORT env var for Render/Railway/Fly.io; default to 5052 locally
+    _port = int(os.environ.get("PORT", 5052))
     hostname = socket.gethostname()
     try:
         local_ip = socket.gethostbyname(hostname)
     except Exception:
         local_ip = "localhost"
     print("ClearEye starting...")
-    print(f"  Local:   http://localhost:5052")
-    print(f"  Network: http://{local_ip}:5052")
+    print(f"  Local:   http://localhost:{_port}")
+    print(f"  Network: http://{local_ip}:{_port}")
     print(f"  Full pipeline: stress test + validation + macro + bias + premortem + 5 advisors")
-    app.run(host="0.0.0.0", port=5052, debug=False)
+    app.run(host="0.0.0.0", port=_port, debug=False)
