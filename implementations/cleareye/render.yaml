@@ -3,17 +3,24 @@ services:
     name: cleareye
     runtime: python
     region: oregon
-    plan: free
+    plan: starter        # $7/month — persistent disk available; upgrade to Standard for more RAM
     buildCommand: pip install -r requirements.txt
-    startCommand: gunicorn app:app --bind 0.0.0.0:$PORT --workers 2 --timeout 120
+    startCommand: gunicorn app:app --bind 0.0.0.0:$PORT --workers 2 --timeout 120 --keep-alive 5
+    rootDir: implementations/cleareye
     envVars:
       - key: ANTHROPIC_API_KEY
-        sync: false   # set this manually in Render dashboard
+        sync: false          # set this manually in Render dashboard — REQUIRED
       - key: SECRET_KEY
-        generateValue: true
+        generateValue: true  # auto-generated secure session secret
       - key: FLASK_ENV
         value: production
       - key: PYTHON_VERSION
-        value: "3.11"
+        value: "3.11.0"
+      - key: DATA_DIR
+        value: /data         # persistent disk mount path
+    disk:
+      name: cleareye-data
+      mountPath: /data
+      sizeGB: 1              # $0.25/GB/month — stores SQLite + uploaded PDFs
     healthCheckPath: /api/health
     autoDeploy: true
