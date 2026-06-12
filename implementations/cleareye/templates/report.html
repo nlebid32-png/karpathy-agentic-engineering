@@ -1,0 +1,140 @@
+{% extends "base.html" %}
+{% block title %}Committee Memorandum — ClearEye{% endblock %}
+{% block folio_right %}Ref. {{ job_id }} · <span class="js-date"></span>{% endblock %}
+{% block bodyclass %}report-page{% endblock %}
+
+{% block content %}
+<div class="watermark" aria-hidden="true"><span>Confidential</span></div>
+
+<main class="report-main">
+
+  <!-- ============ MAST ============ -->
+  <header class="memo-mast">
+    <span class="smallcaps rise">Investment Committee Memorandum · Private &amp; Confidential</span>
+    <h1 class="memo-deal-name rise" style="--d:80ms" id="deal-name">—</h1>
+    <div class="memo-deal-meta rise" style="--d:140ms" id="deal-meta"></div>
+  </header>
+
+  <!-- ============ VERDICT ============ -->
+  <section class="verdict-hero">
+    <div class="killshot rise" style="--d:220ms" id="killshot">
+      <span class="smallcaps" id="killshot-label">The Kill Shot</span>
+      <p id="killshot-text">—</p>
+    </div>
+    <div class="verdict-stampzone">
+      <div class="stamp stamp--xl stamp--animate" id="stamp">—</div>
+      <figure class="gauge rise" style="--d:520ms">
+        <svg viewBox="0 0 160 96">
+          <path class="track" d="M 16 88 A 64 64 0 0 1 144 88" fill="none" stroke-width="9"/>
+          <path class="arc" id="gauge-arc" d="M 16 88 A 64 64 0 0 1 144 88" fill="none" stroke-width="9"
+                pathLength="402.1"/>
+          <text class="pct" id="gauge-pct" x="80" y="84" text-anchor="middle">—</text>
+        </svg>
+        <figcaption class="smallcaps">Committee conviction</figcaption>
+      </figure>
+    </div>
+  </section>
+
+  <!-- key figures -->
+  <div class="keyfigs rise" style="--d:380ms">
+    <div class="keyfigs-inner" id="keyfigs-inner"></div>
+  </div>
+
+  <!-- ============ TOC ============ -->
+  <nav class="memo-toc">
+    <div class="memo-toc-inner">
+      <a href="#s-abstract">§1 Abstract</a>
+      <a href="#s-council">§2 The Council</a>
+      <a href="#s-memo">§3 Memorandum</a>
+      <a href="#s-exhibits">§4 Exhibits</a>
+      <div class="toc-actions">
+        <button class="chip" id="copy-link" type="button">Copy Share Link</button>
+        <button class="chip" id="print-btn" type="button">Print / PDF</button>
+        <a class="chip" href="/app" style="text-decoration:none">New Review</a>
+      </div>
+    </div>
+  </nav>
+
+  <!-- ============ §1 ABSTRACT ============ -->
+  <section class="doc" id="s-abstract">
+    <div class="section-mark"><span class="no">§ 1</span><h2>Deal Abstract</h2></div>
+    <p class="section-lede">As parsed from the sponsor's papers — sponsor claims, not committee findings.</p>
+    <div class="figures-table">
+      <div class="figures-cols">
+        <dl id="abstract-a"></dl>
+        <dl id="abstract-b"></dl>
+      </div>
+    </div>
+    <p id="missing-data" style="display:none;font-size:14px;margin-top:16px;color:var(--ink-soft)"></p>
+  </section>
+
+  <!-- ============ §2 COUNCIL ============ -->
+  <section class="doc" id="s-council">
+    <div class="section-mark"><span class="no">§ 2</span><h2>The Council's Findings</h2></div>
+    <p class="section-lede">Five independent analyses, written blind and peer-reviewed unsigned.
+      Open each dossier for the full text.</p>
+    <div id="dossiers"></div>
+  </section>
+
+  <!-- ============ §3 MEMORANDUM ============ -->
+  <section class="doc" id="s-memo">
+    <div class="section-mark"><span class="no">§ 3</span><h2>The Chairman's Memorandum</h2></div>
+    <p class="section-lede">The controlling document — dissents weighed, verdict reasoned.</p>
+    <div class="memo-letter">
+      <div class="typeset" id="memo-body"></div>
+    </div>
+  </section>
+
+  <!-- ============ §4 EXHIBITS ============ -->
+  <section class="doc" id="s-exhibits">
+    <div class="section-mark"><span class="no">§ 4</span><h2>Exhibits</h2></div>
+
+    <details class="exhibit" open>
+      <summary class="exhibit-head"><span class="ex-no">Exhibit A</span><h3>Sensitivity Analysis</h3>
+        <span class="open-cue"><span class="closed-label">Unfold ↓</span><span class="open-label">Fold ↑</span></span></summary>
+      <div class="exhibit-body" id="ex-stress"></div>
+    </details>
+    <details class="exhibit">
+      <summary class="exhibit-head"><span class="ex-no">Exhibit B</span><h3>Assumption Audit</h3>
+        <span class="open-cue"><span class="closed-label">Unfold ↓</span><span class="open-label">Fold ↑</span></span></summary>
+      <div class="exhibit-body" id="ex-validation"></div>
+    </details>
+    <details class="exhibit">
+      <summary class="exhibit-head"><span class="ex-no">Exhibit C</span><h3>Cognitive Bias Scan</h3>
+        <span class="open-cue"><span class="closed-label">Unfold ↓</span><span class="open-label">Fold ↑</span></span></summary>
+      <div class="exhibit-body" id="ex-bias"></div>
+    </details>
+    <details class="exhibit">
+      <summary class="exhibit-head"><span class="ex-no">Exhibit D</span><h3>Pre-Mortem Scenarios</h3>
+        <span class="open-cue"><span class="closed-label">Unfold ↓</span><span class="open-label">Fold ↑</span></span></summary>
+      <div class="exhibit-body" id="ex-premortem"></div>
+    </details>
+    <details class="exhibit">
+      <summary class="exhibit-head"><span class="ex-no">Exhibit E</span><h3>Macro Brief</h3>
+        <span class="open-cue"><span class="closed-label">Unfold ↓</span><span class="open-label">Fold ↑</span></span></summary>
+      <div class="exhibit-body" id="ex-macro"></div>
+    </details>
+  </section>
+
+  <!-- ============ COLOPHON ============ -->
+  <footer class="memo-colophon">
+    <hr class="colophon-rule">
+    <div class="smallcaps">
+      Prepared by the ClearEye Investment Committee · <span class="js-date"></span> · Ref. {{ job_id }}<br>
+      Machine-generated decision support for qualified professionals — not investment advice.
+    </div>
+    <div class="actions">
+      <button class="btn btn--primary" id="copy-link-2"
+        onclick="document.getElementById('copy-link').click()">Share with Your LPs</button>
+      <a class="btn btn--quiet" href="/app">Underwrite Another Deal</a>
+    </div>
+  </footer>
+
+</main>
+{% endblock %}
+
+{% block scripts %}
+<script>window.CE_PREFILL = {{ prefill_json | safe }};</script>
+<script src="/static/js/md.js"></script>
+<script src="/static/js/report.js"></script>
+{% endblock %}

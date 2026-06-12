@@ -1,0 +1,111 @@
+{% extends "base.html" %}
+{% block title %}Submit a Deal — ClearEye Investment Committee{% endblock %}
+{% block folio_right %}Intake Desk · Session Room A{% endblock %}
+
+{% block content %}
+
+<!-- ============ INTAKE ============ -->
+<section class="intake-wrap" id="intake-section">
+  <div class="intake-head rise">
+    <div class="smallcaps" style="color:var(--oxblood);margin-bottom:14px">Form CE-1 · Application for Committee Review</div>
+    <h1>Convene the committee.</h1>
+    <p>Enter the offering memorandum below. The council reads everything —
+       the projections, the footnotes, and the silences.</p>
+  </div>
+
+  <div class="intake-tabs rise" style="--d:120ms" role="tablist">
+    <button class="intake-tab" role="tab" aria-selected="true"  data-pane="paste">Paste Text</button>
+    <button class="intake-tab" role="tab" aria-selected="false" data-pane="upload">Upload PDF</button>
+    <button class="intake-tab" role="tab" aria-selected="false" data-pane="url">Listing URL</button>
+  </div>
+
+  <div class="intake-body rise" style="--d:160ms">
+    <div id="pane-paste">
+      <textarea id="om-text" class="om-textarea" spellcheck="false"
+        placeholder="OFFERING MEMORANDUM — [DEAL NAME]&#10;Asking price, cap rate, NOI, debt terms, sponsor track record, projections…&#10;&#10;Paste the whole document. The committee prefers primary sources."></textarea>
+    </div>
+    <div id="pane-upload" style="display:none">
+      <div class="drop-zone" id="drop-zone">Drop the offering memorandum PDF here — or click to choose</div>
+      <input type="file" id="pdf-input" accept="application/pdf" style="display:none">
+    </div>
+    <div id="pane-url" style="display:none">
+      <div class="url-row">
+        <input class="url-input" id="listing-url" type="url"
+               placeholder="https://www.loopnet.com/listing/…">
+        <button class="btn" id="fetch-url-btn" type="button">Fetch Listing</button>
+      </div>
+      <p style="font-size:13px;color:var(--ink-faint);margin-top:12px;font-style:italic">
+        LoopNet, Crexi, and most public listing pages. The extract lands in the Paste tab for review.
+      </p>
+    </div>
+
+    <div class="intake-row">
+      <button class="chip" id="load-specimen" type="button">Load specimen deal — Sunset Ridge</button>
+      <span class="quota-note" id="quota-note"></span>
+      <span class="spacer"></span>
+      <button class="btn btn--primary" id="submit-btn" type="button">Submit for Review</button>
+    </div>
+
+    <div class="intake-error" id="intake-error" style="display:none"></div>
+  </div>
+
+  <p class="smallcaps rise" style="--d:220ms;margin-top:22px;text-align:center">
+    Documents are processed for analysis only · Decision support, not investment advice
+  </p>
+</section>
+
+<!-- ============ THE SESSION (theater) ============ -->
+<section class="theater" id="theater">
+  <div class="doc" style="padding-top:56px;padding-bottom:90px">
+    <div class="session-head">
+      <h2>The committee is in session.</h2>
+      <span class="session-clock" id="session-clock">IN SESSION — 00:00</span>
+    </div>
+    <p style="font-style:italic;color:var(--ink-soft);margin:12px 0 0">
+      Do not close this room. A full review takes about ninety seconds; minutes are kept below.
+    </p>
+
+    <div class="seats" aria-label="The five advisors">
+      <div class="seat" style="--adv:var(--adv-bear)">
+        <div class="seat-roman">Advisor I</div>
+        <div class="seat-name">Bear Case Analyst</div>
+        <div class="seat-state">Awaiting papers</div>
+      </div>
+      <div class="seat" style="--adv:var(--adv-bias)">
+        <div class="seat-roman">Advisor II</div>
+        <div class="seat-name">Cognitive Bias Detector</div>
+        <div class="seat-state">Awaiting papers</div>
+      </div>
+      <div class="seat" style="--adv:var(--adv-market)">
+        <div class="seat-roman">Advisor III</div>
+        <div class="seat-name">Market Validation Auditor</div>
+        <div class="seat-state">Awaiting papers</div>
+      </div>
+      <div class="seat" style="--adv:var(--adv-tax)">
+        <div class="seat-roman">Advisor IV</div>
+        <div class="seat-name">Tax &amp; Structure Optimizer</div>
+        <div class="seat-state">Awaiting papers</div>
+      </div>
+      <div class="seat" style="--adv:var(--adv-exit)">
+        <div class="seat-roman">Advisor V</div>
+        <div class="seat-name">Exit Strategy Specialist</div>
+        <div class="seat-state">Awaiting papers</div>
+      </div>
+    </div>
+
+    <div class="progress-rail"><div class="fill" id="progress-fill"></div></div>
+    <div class="progress-label">
+      <span id="progress-stage">REVIEW UNDERWAY</span>
+      <span>VERDICT ON COMPLETION</span>
+    </div>
+
+    <div class="smallcaps" style="margin:30px 0 8px">Minutes of the session</div>
+    <div class="minutes" id="minutes"></div>
+  </div>
+</section>
+
+{% endblock %}
+
+{% block scripts %}
+<script src="/static/js/app.js"></script>
+{% endblock %}

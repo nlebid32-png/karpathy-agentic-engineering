@@ -704,8 +704,9 @@ body {
       <!-- Copy -->
       <div>
         <div class="hero-eyebrow">AI-Powered Underwriting</div>
-        <h1>Underwrite deals.<br><em>Not guesses.</em></h1>
-        <p class="hero-sub">Paste any offering memorandum. ClearEye's five-advisor AI council delivers a Go/No-Go verdict and full IC memo in 90 seconds — for free, no signup required.</p>
+        <!-- #285: A/B test headlines via ?v=b or ce_variant cookie -->
+        <h1 id="hero-h1">Underwrite deals.<br><em>Not guesses.</em></h1>
+        <p class="hero-sub" id="hero-sub">Paste any offering memorandum. ClearEye's five-advisor AI council delivers a Go/No-Go verdict and full IC memo in 90 seconds — for free, no signup required.</p>
         <!-- #265: Animated metric counter strip -->
         <div class="hero-counters" id="hero-counters">
           <div class="hc-item">
@@ -983,6 +984,25 @@ body {
     </div>
   </div>
 </footer>
+
+<!-- #285: A/B headline test -->
+<script>
+(function(){
+  var p=new URLSearchParams(location.search);
+  var v=p.get('v')||sessionStorage.getItem('ce_variant');
+  if(!v){v=Math.random()<0.5?'a':'b';sessionStorage.setItem('ce_variant',v);}
+  if(v==='b'){
+    var h=document.getElementById('hero-h1');
+    var s=document.getElementById('hero-sub');
+    if(h)h.innerHTML='Your AI deal team.<br><em>90 seconds. Free.</em>';
+    if(s)s.textContent='Five AI advisors analyze every offering memorandum — catching optimistic assumptions, flagging deal-breakers, and delivering a Go/No-Go verdict in 90 seconds. No signup required.';
+  }
+  // Attach variant to waitlist submissions for tracking
+  document.addEventListener('submit',function(){
+    try{sessionStorage.setItem('ce_variant_submitted',v);}catch(e){}
+  });
+})();
+</script>
 
 <!-- #265: Animated counter strip -->
 <script>

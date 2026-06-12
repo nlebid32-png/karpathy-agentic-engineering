@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{% block title %}ClearEye — An AI Investment Committee for Real Estate{% endblock %}</title>
+<meta name="description" content="{% block description %}ClearEye convenes five adversarial AI analysts and a Chairman to underwrite any offering memorandum — returned as a signed committee verdict in about ninety seconds.{% endblock %}">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300..900;1,9..144,300..900&family=Source+Serif+4:ital,opsz,wght@0,8..60,300..700;1,8..60,300..700&family=IBM+Plex+Mono:ital,wght@0,300;0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/static/css/cleareye.css">
+{% block head %}{% endblock %}
+</head>
+<body class="{% block bodyclass %}{% endblock %}">
+
+<!-- rubber-stamp grit filter (referenced by .stamp) -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <filter id="stamp-grit">
+    <feTurbulence type="fractalNoise" baseFrequency="0.55" numOctaves="2" seed="7" result="n"/>
+    <feDisplacementMap in="SourceGraphic" in2="n" scale="2.4"/>
+  </filter>
+</svg>
+
+<div class="classification" role="presentation"></div>
+
+<header class="masthead">
+  <div class="masthead-row">
+    <a class="wordmark" href="/">Clear<span class="eye">Eye</span></a>
+    <span class="masthead-tag">An AI Investment Committee</span>
+    <nav class="masthead-nav">
+      <a href="/#council">The Council</a>
+      <a href="/#procedure">Procedure</a>
+      <a href="/pricing">Fee Schedule</a>
+      <a href="/app" class="is-cta">Submit a Deal</a>
+    </nav>
+  </div>
+  <div class="masthead-rules"></div>
+</header>
+<div class="folio-line">
+  <span>Private &amp; Confidential — prepared for the addressee only</span>
+  <span>{% block folio_right %}Est. MMXXVI · Five advisors · One chairman{% endblock %}</span>
+</div>
+
+{% block content %}{% endblock %}
+
+<footer class="colophon">
+  <div class="colophon-inner">
+    <div>
+      <a class="wordmark" href="/">Clear<span class="eye">Eye</span></a>
+      <p style="font-style:italic;color:var(--ink-soft);font-size:14.5px;max-width:300px;margin-top:10px">
+        Every memorandum deserves a hostile reading.
+      </p>
+    </div>
+    <div class="colophon-cols">
+      <div class="colophon-col">
+        <h4>The Practice</h4>
+        <a href="/app">Submit a deal</a>
+        <a href="/pricing">Fee schedule</a>
+        <a href="/deals">Pipeline</a>
+        <a href="/markets">Market desk</a>
+      </div>
+      <div class="colophon-col">
+        <h4>Papers</h4>
+        <a href="/blog">Field notes</a>
+        <a href="/portfolio">Portfolio</a>
+        <a href="/system-status">Status of systems</a>
+      </div>
+      <div class="colophon-col">
+        <h4>Correspondence</h4>
+        <a href="/login">Member sign-in</a>
+        <a href="mailto:desk@cleareye.app">desk@cleareye.app</a>
+      </div>
+    </div>
+  </div>
+  <div class="colophon-legal">
+    ClearEye provides analytical decision support, not investment advice, legal counsel, or a recommendation
+    to buy or sell any security or property. Verdicts are machine-generated opinions for qualified
+    professionals who will conduct their own diligence. © MMXXVI ClearEye. All figures unaudited.
+  </div>
+</footer>
+
+{% block scripts %}{% endblock %}
+</body>
+</html>

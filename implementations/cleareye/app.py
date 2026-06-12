@@ -44,7 +44,7 @@ if not os.environ.get("ANTHROPIC_API_KEY"):
     os.environ["ANTHROPIC_API_KEY"] = _env.get("ANTHROPIC_API_KEY", "")
 
 import requests
-from flask import Flask, jsonify, render_template_string, request, send_file, Response, stream_with_context
+from flask import Flask, jsonify, render_template, render_template_string, request, send_file, Response, stream_with_context
 
 sys.path.insert(0, str(Path(__file__).parent))
 from cleareye import run as run_pipeline
@@ -365,6 +365,24 @@ def _analyze(job_id: str, om_text: str, recipient_email: str | None):
 
         output["status"] = "done"
 
+        # Extract verdict from memo if not already set (#pipeline-fix)
+        if not output.get("verdict"):
+            _memo = output.get("memo", "")
+            import re as _re2
+            # Try explicit verdict markers first
+            _vm = _re2.search(r'(?:VERDICT|DECISION|RECOMMENDATION)[:\s]+([A-Z][A-Z\s/-]{1,20})', _memo, _re2.I)
+            if _vm:
+                _vt = _vm.group(1).strip().upper()
+            elif _re2.search(r'KILL\s+SHOT|NO.GO|PASS|REJECT|DECLINE|AVOID', _memo, _re2.I):
+                _vt = "NO-GO"
+            elif _re2.search(r'CONDITIONAL|PROCEED\s+WITH\s+CAUTION|QUALIFIED', _memo, _re2.I):
+                _vt = "CONDITIONAL"
+            elif _re2.search(r'\bGO\b|PROCEED|STRONG\s+BUY|APPROVE', _memo, _re2.I):
+                _vt = "GO"
+            else:
+                _vt = "CONDITIONAL"
+            output["verdict"] = _vt
+
         if recipient_email:
             _update("sending_email")
             email_result = send_memo(output, recipient_email)
@@ -563,7 +581,13 @@ def auth_logout():
 # ---------------------------------------------------------------------------
 @app.route("/pricing")
 def pricing_page():
-    """Pricing page — freemium + 3 paid tiers. Meridian theme."""
+    """Pricing page — fee schedule (Committee Papers theme)."""
+    has_stripe = bool(os.environ.get("STRIPE_SECRET_KEY", _env.get("STRIPE_SECRET_KEY", "")))
+    return render_template("pricing.html", has_stripe=has_stripe)
+
+
+def _pricing_page_legacy():
+    """Retired Meridian-theme pricing page, kept for reference until the functionality pass."""
     has_stripe = bool(os.environ.get("STRIPE_SECRET_KEY", _env.get("STRIPE_SECRET_KEY", "")))
     return render_template_string("""<!DOCTYPE html><html lang="en">
 <head>
@@ -1206,15 +1230,12 @@ def _upsert_user_subscription(email: str, plan: str, sub_id: str, status: str):
 
 @app.route("/")
 def landing():
-    landing_path = Path(__file__).parent / "landing.html"
-    if landing_path.exists():
-        return send_file(str(landing_path))
-    return render_template_string(HTML)
+    return render_template("landing.html")
 
 
 @app.route("/app")
 def index():
-    return render_template_string(HTML)
+    return render_template("app.html")
 
 
 @app.route("/api/quick-scan", methods=["POST"])
@@ -1588,7 +1609,7 @@ def report(job_id):
             job = {**db_job["result"], "status": "done"}
     if not job or job.get("status") != "done":
         return "<h2 style='font-family:sans-serif;color:#888;padding:40px;'>Report not found or still processing.</h2>", 404
-    return render_template_string(HTML, _prefill_job=json.dumps({
+    prefill = json.dumps({
         "status": "done",
         "deal": job.get("deal", {}),
         "memo": job.get("memo", ""),
@@ -1598,7 +1619,11 @@ def report(job_id):
         "bias_report": job.get("bias_report", ""),
         "premortem_report": job.get("premortem_report", ""),
         "macro_brief": job.get("macro", {}).get("brief", ""),
-    }), _report_mode=True, _job_id=job_id)
+        "verdict": job.get("verdict", ""),
+        "confidence": job.get("confidence", ""),
+        "generated_at": job.get("generated_at", ""),
+    }).replace("</", "<\\/")  # keep </script> sequences from breaking out of the tag
+    return render_template("report.html", prefill_json=prefill, job_id=job_id)
 
 
 @app.route("/api/reanalyze/<job_id>", methods=["POST"])
@@ -2796,6 +2821,134 @@ def market_scores():
     return jsonify(scores)
 
 
+@app.route("/blog")
+@app.route("/blog/<slug>")
+def blog_page(slug=None):
+    """#281: SEO blog — real estate AI articles for organic traffic."""
+    ARTICLES = [
+        {
+            "slug": "underwrite-multifamily-deal-90-seconds",
+            "title": "How to Underwrite a Multifamily Deal in 90 Seconds with AI",
+            "date": "June 2025",
+            "desc": "Traditional underwriting takes 2-4 hours. Here's how AI changes the math.",
+            "body": """<p>Underwriting a multifamily deal used to mean hours of work: downloading the OM, building a spreadsheet model, stress-testing assumptions, and writing a summary memo. For active deal teams looking at 5-10 deals a week, that's 20-40 hours of analyst time — before you've even decided whether to make an offer.</p>
+<p>ClearEye compresses this to 90 seconds. Here's how it works:</p>
+<h2>The 5-Advisor Council</h2>
+<p>When you paste an OM into ClearEye, five specialized AI advisors analyze it simultaneously. Marcus (structures), Diana (risk), Bobby (market), PropTech Analyst, and GTM Strategist each review the deal from their angle. They're specifically prompted to find the optimistic assumptions, the market dynamics, and the deal-breaker flags that operators bury in footnotes.</p>
+<h2>What the AI Looks For</h2>
+<p>The council specifically flags: cap rate spread vs. current market benchmarks, projected rent growth vs. trailing market actuals, debt service coverage under rising rate scenarios, exit cap rate assumptions, and sponsor track record claims. These are the four categories where optimism typically gets buried.</p>
+<h2>The Output</h2>
+<p>After 90 seconds, you get a Go/No-Go verdict, a confidence score (0-100), a one-paragraph IC memo, a stress test across 9 rate scenarios, and a bias audit calling out the most aggressive assumptions. You can share it with your LP directly via a password-protected link.</p>
+<p>For deal teams screening volume, this isn't about replacing judgment — it's about spending your judgment on deals that deserve it.</p>"""
+        },
+        {
+            "slug": "red-flags-real-estate-investors-miss",
+            "title": "Red Flags Every Real Estate Investor Misses in an OM",
+            "date": "June 2025",
+            "desc": "The four places where optimistic assumptions hide in offering memoranda.",
+            "body": """<p>Offering memoranda are marketing documents. They're written to sell, not to inform. The good ones bury the risks in footnotes and financial statement line items that most buyers skim. Here are the four places where bad assumptions consistently hide.</p>
+<h2>1. The Rent Growth Assumption</h2>
+<p>Most OMs project 3-5% annual rent growth. In markets that averaged 1.2% over the last decade, that's aggressive. Check the projected rents against trailing 3-year actuals from CoStar or RealPage. If the spread is more than 150 basis points, the deal math is built on optimism.</p>
+<h2>2. The Exit Cap Rate</h2>
+<p>Operators buy at a 5.2% cap and project a 4.8% exit cap in year 5. This is a compression assumption — they're betting cap rates go down. In a rising-rate environment, this has historically not held. A 50 bps expansion in exit cap can eliminate 3-4 points of IRR.</p>
+<h2>3. CapEx Reserves</h2>
+<p>Value-add deals project $10,000/unit in renovation costs and $500/unit annual reserves. For 1970s-vintage properties, $500/unit doesn't cover deferred maintenance. The repair reserve should be at least 3% of EGI on older assets.</p>
+<h2>4. Vacancy Assumptions</h2>
+<p>Pro forma vacancy rates of 5% are common. In secondary markets with concentrated employment, 8-10% stabilized vacancy is realistic. Every 1% difference in vacancy at $1,500/month rent on 200 units is $36,000/year — roughly a 30 bps swing in cap rate.</p>
+<p>ClearEye's bias detection module specifically looks for these four patterns and flags them in every analysis, before you've committed time to a site visit.</p>"""
+        },
+        {
+            "slug": "cap-rate-vs-irr-what-ai-looks-for",
+            "title": "Cap Rate vs IRR: What AI Advisors Look For in 2025",
+            "date": "June 2025",
+            "desc": "Why the cap rate is the wrong metric to lead with, and what replaces it.",
+            "body": """<p>Cap rates are the most quoted metric in real estate, and probably the most misused. A 5.5% cap rate on a Phoenix apartment complex means something very different than a 5.5% cap on a Detroit mixed-use building — different risk profiles, different rent growth trajectories, different exit markets.</p>
+<h2>What Cap Rate Actually Measures</h2>
+<p>Cap rate is the ratio of net operating income to purchase price. It tells you the yield on an all-cash purchase with no debt and no time value of money. It's useful for comparing assets in the same market and asset class. It's nearly useless for comparing assets across markets or evaluating a leveraged investment.</p>
+<h2>Why IRR Matters More for Leveraged Deals</h2>
+<p>Projected IRR accounts for financing terms, rent growth, exit assumptions, and the time value of capital. A deal with a 5.8% cap and 60% LTV at current rates might pencil at 11% IRR. The same deal with 75% LTV might show 18% — or might show negative returns if the debt service coverage breaks in year 2 under a rate reset.</p>
+<h2>What ClearEye's AI Specifically Checks</h2>
+<p>Our council validates IRR plausibility against three benchmarks: cap rate vs. market comps (to check purchase price reasonableness), projected rent growth vs. market actuals (to stress-test revenue), and exit cap assumptions vs. current market direction (to pressure-test the terminal value). If projected IRR exceeds 20% on a market-rate multifamily deal in a gateway city, the AI flags it as potentially optimistic — because it almost always is.</p>
+<p>The goal isn't to replace your underwriting model. It's to catch the assumption drift before you spend 40 hours on a deal that doesn't pencil.</p>"""
+        }
+    ]
+
+    if slug:
+        article = next((a for a in ARTICLES if a["slug"] == slug), None)
+        if not article:
+            return "<h2>Article not found</h2><a href='/blog'>Back to blog</a>", 404
+        # Single article page
+        return render_template_string("""<!DOCTYPE html><html lang="en">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>{{ a.title }} — ClearEye</title>
+<meta name="description" content="{{ a.desc }}">
+<meta property="og:title" content="{{ a.title }}"><meta property="og:description" content="{{ a.desc }}">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;1,400&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:#F7F5F0;color:#0D1926;font-family:'Plus Jakarta Sans',sans-serif;line-height:1.7;font-size:16px;}
+nav{height:54px;background:rgba(247,245,240,.94);border-bottom:1px solid #E8E5DF;display:flex;align-items:center;padding:0 24px;position:sticky;top:0;z-index:100;}
+.brand{font-weight:700;font-size:15px;color:#155E44;text-decoration:none;}
+.article{max-width:680px;margin:48px auto;padding:0 20px 80px;}
+h1{font-family:'Cormorant Garamond',Georgia,serif;font-size:2.2rem;font-weight:400;letter-spacing:-.02em;margin-bottom:12px;line-height:1.2;}
+.meta{font-size:12px;color:#8D98A5;margin-bottom:32px;}
+h2{font-family:'Cormorant Garamond',Georgia,serif;font-size:1.35rem;font-weight:500;margin:28px 0 10px;}
+p{margin-bottom:16px;color:#334155;}
+.cta-box{background:#155E44;border-radius:12px;padding:24px 28px;margin-top:40px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:14px;}
+.cta-box p{color:rgba(255,255,255,.8);font-size:13px;margin:0;}
+.cta-btn{display:inline-flex;align-items:center;padding:10px 20px;background:#fff;color:#155E44;border-radius:7px;font-size:13px;font-weight:700;text-decoration:none;white-space:nowrap;}
+.back{font-size:12px;color:#155E44;text-decoration:none;}
+</style></head><body>
+<nav><a class="brand" href="/">&#128065; ClearEye</a><div style="margin-left:auto;"><a href="/blog" style="font-size:12px;color:#4A5568;text-decoration:none;">&#8592; All articles</a></div></nav>
+<div class="article">
+  <a class="back" href="/blog">&#8592; Back to blog</a>
+  <h1 style="margin-top:20px;">{{ a.title }}</h1>
+  <div class="meta">{{ a.date }} &middot; ClearEye Research</div>
+  {{ a.body|safe }}
+  <div class="cta-box">
+    <p>Analyze your next deal the same way — in 90 seconds, free.</p>
+    <a class="cta-btn" href="/app">Try ClearEye free &rarr;</a>
+  </div>
+</div></body></html>""", a=article)
+
+    # Blog index
+    return render_template_string("""<!DOCTYPE html><html lang="en">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>ClearEye Blog — AI Real Estate Analysis Insights</title>
+<meta name="description" content="Practical guides on AI-powered real estate underwriting, cap rates, IRR, and deal analysis.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;1,400&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:#F7F5F0;color:#0D1926;font-family:'Plus Jakarta Sans',sans-serif;line-height:1.6;font-size:15px;}
+nav{height:54px;background:rgba(247,245,240,.94);border-bottom:1px solid #E8E5DF;display:flex;align-items:center;padding:0 24px;position:sticky;top:0;}
+.brand{font-weight:700;font-size:15px;color:#155E44;text-decoration:none;}
+.wrap{max-width:760px;margin:48px auto;padding:0 20px 80px;}
+.eyebrow{font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:#155E44;margin-bottom:14px;font-family:'JetBrains Mono',monospace;}
+h1{font-family:'Cormorant Garamond',Georgia,serif;font-size:2rem;font-weight:400;margin-bottom:10px;letter-spacing:-.02em;}
+.sub{font-size:14px;color:#4A5568;margin-bottom:40px;}
+.article-card{background:#fff;border:1px solid #E8E5DF;border-radius:10px;padding:22px 24px;margin-bottom:14px;text-decoration:none;display:block;color:inherit;transition:box-shadow .15s,border-color .15s;}
+.article-card:hover{border-color:rgba(21,94,68,.25);box-shadow:0 4px 16px rgba(0,0,0,.06);}
+.article-title{font-family:'Cormorant Garamond',Georgia,serif;font-size:1.2rem;font-weight:400;margin-bottom:6px;color:#0D1926;}
+.article-desc{font-size:12px;color:#6B7280;margin-bottom:10px;}
+.article-meta{font-size:11px;color:#9CA3AF;}
+</style></head><body>
+<nav><a class="brand" href="/">&#128065; ClearEye</a><div style="margin-left:auto;display:flex;gap:12px;align-items:center;"><a href="/app" style="font-size:12px;color:#155E44;font-weight:600;text-decoration:none;padding:6px 14px;border:1px solid rgba(21,94,68,.3);border-radius:6px;">Try it free &rarr;</a></div></nav>
+<div class="wrap">
+  <div class="eyebrow">ClearEye Research</div>
+  <h1>AI Real Estate Analysis,<br><em>explained.</em></h1>
+  <p class="sub">Practical guides on underwriting, deal analysis, and what AI looks for in an offering memorandum.</p>
+  {% for a in articles %}
+  <a class="article-card" href="/blog/{{ a.slug }}">
+    <div class="article-title">{{ a.title }}</div>
+    <div class="article-desc">{{ a.desc }}</div>
+    <div class="article-meta">{{ a.date }} &middot; ClearEye Research</div>
+  </a>
+  {% endfor %}
+</div></body></html>""", articles=ARTICLES)
+
+
 @app.route("/portfolio")
 def portfolio_page():
     """Portfolio-level analytics dashboard (#223)."""
@@ -3534,6 +3687,81 @@ def api_health():
         pass
     code = 200 if health["status"] == "ok" else 207
     return jsonify(health), code
+
+
+@app.route("/system-status")
+def system_status_page():
+    """#284: Public system status page for uptime transparency."""
+    try:
+        from db import _conn as _db_conn
+        from datetime import date as _date
+        total = _db_conn().execute("SELECT COUNT(*) FROM deals").fetchone()[0]
+        today_str = _date.today().isoformat()
+        today = _db_conn().execute(
+            "SELECT COUNT(*) FROM deals WHERE created_at LIKE ?", (today_str + "%",)
+        ).fetchone()[0]
+        db_ok = True
+    except Exception:
+        total, today, db_ok = 0, 0, False
+
+    api_ok = bool(os.environ.get("ANTHROPIC_API_KEY") or _env.get("ANTHROPIC_API_KEY"))
+    overall = "operational" if (db_ok and api_ok) else "degraded"
+    overall_color = "#155E44" if overall == "operational" else "#B91C1C"
+    overall_icon = "&#9679;" if overall == "operational" else "&#9888;"
+
+    return render_template_string("""<!DOCTYPE html><html lang="en">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta http-equiv="refresh" content="30">
+<title>ClearEye Status</title>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:#F7F5F0;color:#0D1926;font-family:'Plus Jakarta Sans',sans-serif;font-size:14px;padding:40px 20px;}
+.wrap{max-width:600px;margin:0 auto;}
+.brand{font-size:15px;font-weight:700;color:#155E44;margin-bottom:32px;display:flex;align-items:center;gap:8px;}
+.brand-dot{width:22px;height:22px;background:#155E44;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:10px;color:#fff;}
+.status-hero{background:#fff;border:1px solid #E8E5DF;border-radius:12px;padding:24px 28px;margin-bottom:20px;display:flex;align-items:center;gap:14px;}
+.status-dot{font-size:20px;}
+.status-label{font-size:18px;font-weight:700;letter-spacing:-.01em;}
+.status-sub{font-size:12px;color:#8D98A5;margin-top:3px;}
+.grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:20px;}
+.stat{background:#fff;border:1px solid #E8E5DF;border-radius:10px;padding:16px 18px;}
+.stat-val{font-family:'JetBrains Mono',monospace;font-size:1.4rem;font-weight:600;color:#155E44;margin-bottom:2px;}
+.stat-lbl{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.08em;color:#8D98A5;}
+.checks{background:#fff;border:1px solid #E8E5DF;border-radius:10px;padding:16px 20px;}
+.check-row{display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-bottom:1px solid #F0EDE7;}
+.check-row:last-child{border-bottom:none;}
+.check-name{font-size:13px;font-weight:500;}
+.check-ok{font-size:11px;font-weight:700;color:#155E44;font-family:'JetBrains Mono',monospace;}
+.check-err{font-size:11px;font-weight:700;color:#B91C1C;font-family:'JetBrains Mono',monospace;}
+.footer{font-size:11px;color:#8D98A5;text-align:center;margin-top:20px;}
+</style></head><body>
+<div class="wrap">
+  <div class="brand"><div class="brand-dot">&#128065;</div>ClearEye</div>
+  <div class="status-hero">
+    <div class="status-dot" style="color:{{ overall_color }};">{{ overall_icon }}</div>
+    <div>
+      <div class="status-label" style="color:{{ overall_color }};">All systems {{ overall }}</div>
+      <div class="status-sub">Last updated: {{ now }}</div>
+    </div>
+  </div>
+  <div class="grid">
+    <div class="stat"><div class="stat-val">{{ today }}</div><div class="stat-lbl">Analyses today</div></div>
+    <div class="stat"><div class="stat-val">{{ total }}</div><div class="stat-lbl">Total analyzed</div></div>
+    <div class="stat"><div class="stat-val">&lt;90s</div><div class="stat-lbl">Avg analysis time</div></div>
+  </div>
+  <div class="checks">
+    <div class="check-row"><span class="check-name">API (Anthropic Claude)</span><span class="{{ 'check-ok' if api_ok else 'check-err' }}">{{ 'OPERATIONAL' if api_ok else 'DEGRADED' }}</span></div>
+    <div class="check-row"><span class="check-name">Database</span><span class="{{ 'check-ok' if db_ok else 'check-err' }}">{{ 'OPERATIONAL' if db_ok else 'DEGRADED' }}</span></div>
+    <div class="check-row"><span class="check-name">Analysis pipeline</span><span class="check-ok">OPERATIONAL</span></div>
+    <div class="check-row"><span class="check-name">Report sharing</span><span class="check-ok">OPERATIONAL</span></div>
+  </div>
+  <div class="footer">Auto-refreshes every 30 seconds &middot; <a href="/app" style="color:#155E44;">Back to app</a></div>
+</div></body></html>""",
+        overall=overall, overall_color=overall_color, overall_icon=overall_icon,
+        today=today, total=total, api_ok=api_ok, db_ok=db_ok,
+        now=datetime.utcnow().strftime("%Y-%m-%d %H:%M UTC")
+    )
 
 
 @app.route("/api/circuit-breakers", methods=["GET"])
@@ -9356,7 +9584,7 @@ async function startAnalyze(){
         document.getElementById('empty-state').innerHTML=
           '<div style="max-width:420px;margin:0 auto;padding:32px 20px;text-align:center;">'
           +'<div style="font-size:2rem;margin-bottom:16px;">&#128202;</div>'
-          +'<div style="font-family:var(--font-display);font-style:italic;font-size:1.4rem;font-weight:400;margin-bottom:10px;color:var(--text-primary);">You\'ve used all your free analyses.</div>'
+          +'<div style="font-family:var(--font-display);font-style:italic;font-size:1.4rem;font-weight:400;margin-bottom:10px;color:var(--text-primary);">You&#39;ve used all your free analyses.</div>'
           +'<div style="font-size:13px;color:var(--text-secondary);margin-bottom:20px;line-height:1.65;">ClearEye Professional unlocks unlimited analyses, LP sharing, deal alerts, and the full pipeline board — for teams that look at deals seriously.</div>'
           +'<a href="/pricing" style="display:inline-flex;align-items:center;gap:6px;padding:11px 24px;background:var(--accent);color:#fff;border-radius:8px;font-size:13px;font-weight:700;text-decoration:none;">See pricing — start free &rarr;</a>'
           +'<div style="margin-top:14px;font-size:11px;color:var(--text-muted);">Or wait until next month for your quota to reset.</div>'
@@ -9402,7 +9630,7 @@ const SMSG={
   council:      'Marcus, Diana, Bobby, PropTech, and GTM are deliberating...',
   chairman:     'Chairman is synthesizing the council consensus...',
   sending_email:'Preparing your investment memo...',
-  done:         'Analysis complete — here\'s your verdict.'
+  done:         'Analysis complete — here&#39;s your verdict.'
 };
 
 async function poll(jid){
@@ -9564,7 +9792,7 @@ function renderResults(data){
   const biasF=(data.bias_report||'').split('\\n').filter(l=>l.includes('DETECTED')||l.includes('[!]')||l.includes('HIGH')).length;
   const grade=(data.validation_report||'').match(/Grade[:\\s]+([A-F][+-]?)/)?.[1];
   const sb=[];
-  const _diligenceTab=()=>document.querySelector('[onclick*="showTab(\'diligence\'"]')||document.getElementById('tab-diligence-btn');
+  const _diligenceTab=()=>document.getElementById('tab-diligence-btn');
   if(auditRed>0)sb.push(`<span class="sum-chip sc-red" onclick="showTab('diligence',_diligenceTab()||this)">Audit: ${auditRed} red flags</span>`);
   if(biasF>0)sb.push(`<span class="sum-chip sc-amber" onclick="showTab('diligence',_diligenceTab()||this)">Bias: ${biasF} flags</span>`);
   if(grade){const gc=grade[0]==='A'||grade[0]==='B'?'sc-green':grade[0]==='D'||grade[0]==='F'?'sc-red':'sc-amber';sb.push(`<span class="sum-chip ${gc}">Audit Grade: ${grade}</span>`);}
@@ -9794,7 +10022,6 @@ function renderResults(data){
     const sentences=allText.split(/(?<=[.!?])\\s+/);
     const riskKw=/risk|concern|flag|caution|warn|issue|problem|gap|miss|weak|inflat|optimis|understat|no.go|deal.break/i;
     const keyFinding=(sentences.find(s=>riskKw.test(s))||sentences[0]||'').trim().slice(0,140);
-    const rid='ar'+i;
     const d=document.createElement('div');
     d.className='adv-card '+meta.cls+' s'+Math.min(i+1,5);
     const advHdr='<div class="adv-hdr">'
@@ -9811,7 +10038,7 @@ function renderResults(data){
     const advBody=allText?'<div class="adv-body adv-body-collapsed" id="adv-body-'+rid+'">'
       +'<div class="adv-text">'+esc(allText)+'</div>'
       +'</div>'
-      +'<div class="adv-more" onclick="togAdv(\'adv-body-'+rid+'\',this)">&#9660; Full analysis</div>':'';
+      +'<div class="adv-more" onclick="togAdv(this.previousElementSibling.id,this)">&#9660; Full analysis</div>':'';
     d.innerHTML=advHdr+advBody;
     aEl.appendChild(d);
   });

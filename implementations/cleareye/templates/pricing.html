@@ -1,0 +1,176 @@
+{% extends "base.html" %}
+{% block title %}Fee Schedule — ClearEye Investment Committee{% endblock %}
+{% block description %}Start free — three committee reviews a month, no card. Operator $297, Professional $697, Team $1,997.{% endblock %}
+{% block folio_right %}Schedule of Fees · Effective MMXXVI{% endblock %}
+
+{% block content %}
+
+<section class="doc-wide" style="padding-top:64px">
+  <div style="text-align:center;max-width:640px;margin:0 auto 56px">
+    <div class="smallcaps rise" style="color:var(--oxblood);margin-bottom:16px">Schedule of Fees · Form CE-2</div>
+    <h1 class="rise" style="--d:80ms;font-family:var(--display);font-weight:600;font-size:clamp(36px,5vw,56px);line-height:1.04">
+      Terms of <em style="color:var(--green)">engagement.</em>
+    </h1>
+    <p class="rise" style="--d:160ms;font-size:17.5px;color:var(--ink-soft);margin-top:16px">
+      One bad deal costs six figures and three years. A committee review costs ninety seconds —
+      and the first three each month cost nothing at all.
+    </p>
+  </div>
+
+  <div class="fee-grid">
+
+    <!-- STARTER -->
+    <article class="fee-card rise" style="--d:0ms">
+      <div class="fee-tier">Tier I</div>
+      <h2 class="fee-name">Starter</h2>
+      <div class="fee-price"><b>$0</b><span>forever</span></div>
+      <p class="fee-for">For the investor screening a few deals a quarter.</p>
+      <ul class="fee-list">
+        <li class="is-key">3 committee reviews / month</li>
+        <li>Full five-advisor council</li>
+        <li>Stamped verdict + chairman's memo</li>
+        <li>Sensitivity grid &amp; exhibits</li>
+        <li>Print / PDF export</li>
+        <li class="is-dim">LP share portal</li>
+        <li class="is-dim">Deal pipeline board</li>
+      </ul>
+      <a class="btn" href="/app">Begin — No Card</a>
+      <div class="fee-note">No card. No trial clock. Just the work.</div>
+    </article>
+
+    <!-- OPERATOR -->
+    <article class="fee-card rise" style="--d:90ms">
+      <div class="fee-tier">Tier II</div>
+      <h2 class="fee-name">Operator</h2>
+      <div class="fee-price"><b>$297</b><span>/ month</span></div>
+      <p class="fee-for">For the active acquirer underwriting weekly.</p>
+      <ul class="fee-list">
+        <li class="is-key">20 committee reviews / month</li>
+        <li>Everything in Starter</li>
+        <li>Deal history &amp; search</li>
+        <li>Market heat map</li>
+        <li>Assumption override &amp; re-analysis</li>
+        <li class="is-dim">LP share portal</li>
+        <li class="is-dim">Deal pipeline board</li>
+      </ul>
+      <button class="btn js-checkout" data-plan="operator">Engage Operator</button>
+      <div class="fee-note">Annual: $2,970 — two months free.</div>
+    </article>
+
+    <!-- PROFESSIONAL -->
+    <article class="fee-card is-featured rise" style="--d:180ms">
+      <div class="fee-flag">Most Engaged</div>
+      <div class="fee-tier">Tier III</div>
+      <h2 class="fee-name">Professional</h2>
+      <div class="fee-price"><b>$697</b><span>/ month</span></div>
+      <p class="fee-for">For the GP raising outside capital.</p>
+      <ul class="fee-list">
+        <li class="is-key">Unlimited committee reviews</li>
+        <li>Everything in Operator</li>
+        <li class="is-key">LP share portal, password-gated</li>
+        <li class="is-key">Deal alerts &amp; email digests</li>
+        <li>Pipeline board — screening to close</li>
+        <li>Saved searches &amp; comps benchmarks</li>
+        <li>One seat</li>
+      </ul>
+      <button class="btn btn--primary js-checkout" data-plan="professional">Engage Professional</button>
+      <div class="fee-note">Annual: $6,970 — two months free.</div>
+    </article>
+
+    <!-- TEAM -->
+    <article class="fee-card rise" style="--d:270ms">
+      <div class="fee-tier">Tier IV</div>
+      <h2 class="fee-name">Team</h2>
+      <div class="fee-price"><b>$1,997</b><span>/ month</span></div>
+      <p class="fee-for">For the shop with analysts and a real pipeline.</p>
+      <ul class="fee-list">
+        <li class="is-key">Unlimited reviews · 5 seats</li>
+        <li>Everything in Professional</li>
+        <li>Shared deal workspace</li>
+        <li>Due-diligence checklists</li>
+        <li>Document vault per deal</li>
+        <li class="is-key">API access</li>
+        <li>Priority correspondence</li>
+      </ul>
+      <button class="btn js-checkout" data-plan="team">Engage Team</button>
+      <div class="fee-note">Annual: $19,970 — two months free.</div>
+    </article>
+  </div>
+
+  <div class="assurance-row rise">
+    <span class="assurance"><b>✓</b> Cancel any month</span>
+    <span class="assurance"><b>✓</b> Your documents are not training data</span>
+    <span class="assurance"><b>✓</b> Verdicts in ~90 seconds</span>
+    <span class="assurance"><b>✓</b> Built by underwriters, audited by a bear</span>
+  </div>
+
+  <!-- the arithmetic -->
+  <section class="doc" style="padding-top:90px">
+    <div class="section-mark"><span class="no">§</span><h2>The Arithmetic</h2></div>
+    <div class="specimen" style="border-left-color:var(--green)">
+      <blockquote style="font-size:clamp(18px,2.2vw,23px)">
+        “An analyst spends four hours building the skeptic's case on one OM. The committee files
+        it in ninety seconds — with the dissent you'd never write about your own deal.
+        Decline one bad acquisition and the subscription has paid for itself for a decade.”
+      </blockquote>
+      <figcaption>
+        <span class="smallcaps">Why firms engage the committee</span>
+        <a class="btn btn--quiet" style="margin-left:auto" href="/app">Test it on a live deal →</a>
+      </figcaption>
+    </div>
+  </section>
+</section>
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+(function () {
+  "use strict";
+  var HAS_STRIPE = {{ 'true' if has_stripe else 'false' }};
+
+  document.querySelectorAll(".js-checkout").forEach(function (btn) {
+    btn.addEventListener("click", function () {
+      var plan = btn.dataset.plan;
+      if (HAS_STRIPE) {
+        btn.disabled = true; btn.textContent = "OPENING LEDGER…";
+        fetch("/api/create-checkout-session", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ plan: plan })
+        })
+          .then(function (r) { return r.json(); })
+          .then(function (j) {
+            if (j.url) location.href = j.url;
+            else throw new Error(j.error || "Checkout unavailable");
+          })
+          .catch(function () { btn.disabled = false; btn.textContent = "TRY AGAIN"; });
+        return;
+      }
+      // Early-access capture when billing is not yet live
+      if (btn.dataset.armed) return;
+      btn.dataset.armed = "1";
+      var wrap = document.createElement("div");
+      wrap.className = "access-form";
+      wrap.innerHTML =
+        '<input type="email" placeholder="name@firm.com" aria-label="Work email">' +
+        '<button class="btn btn--primary" type="button">Request</button>';
+      btn.replaceWith(wrap);
+      var input = wrap.querySelector("input");
+      input.focus();
+      wrap.querySelector("button").addEventListener("click", function () {
+        var email = input.value.trim();
+        if (!/.+@.+\..+/.test(email)) { input.style.borderColor = "var(--oxblood)"; return; }
+        fetch("/api/early-access", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ email: email, plan: plan })
+        }).then(function () {
+          wrap.outerHTML = '<div class="smallcaps" style="color:var(--green);padding:14px 0;text-align:center">✓ Noted — the desk will write to you.</div>';
+        });
+      });
+    });
+  });
+})();
+</script>
+{% endblock %}
