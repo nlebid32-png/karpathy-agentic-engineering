@@ -46,6 +46,23 @@ Constraints:
 - Agent 2: Social proof — lead with testimonials and case study stats, then features
 - Agent 3: Urgency/scarcity — limited-time offer framing, countdown CTA, FOMO triggers
 
+### Don't hand-pick strategies — seed them orthogonally
+
+Eyeballing "a different strategy per agent" risks correlated lenses (two agents
+both doing variations of caching) that waste the parallelism. Generate disjoint,
+verified-orthogonal strategies instead:
+
+```
+python scripts/orthogonal_seed.py --domain optimization --agents 3 --task "cut p50 latency"
+```
+
+This ports the llm_council's Muon-style orthogonalization: each agent gets a
+constraint vector with a "sole purpose" so no two can converge. The set is scored
+with the toolkit's diversity_check — if the lenses are too similar it prints
+`WARN: strategies too correlated` so you reseed before burning N worktrees.
+Domains: `optimization`, `refactoring`, `copywriting`, `research`, `debugging`,
+`general`. Slot each emitted `dispatch_strategy` into the `{strategy}` field below.
+
 ---
 
 ## refactorer

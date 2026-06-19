@@ -307,3 +307,25 @@ sequence (regression rollback + target stop both correct).
 **Next iteration (spec'd, not built):** port the council's Muon-style orthogonal
 seeding into agenthub — its N agents currently share one prompt (correlated attempts);
 disjoint strategy constraints would widen solution coverage. Highest-value on-theme merge.
+
+## Session 4 — 2026-06-16: Orthogonal seeding (council → agenthub merge)
+
+Built the highest-value merge spec'd in session 3: ported the llm_council's
+Muon-style orthogonalization into agenthub's parallel-competition spawn.
+
+`skills/agenthub/scripts/orthogonal_seed.py` — given a domain + N, emits N disjoint
+strategy constraint vectors (each a "sole purpose" lens, à la council personas) so
+agenthub's N agents can't converge on correlated attempts. 6 domains: optimization,
+refactoring, copywriting, research, debugging, general.
+
+Cross-module integration: the seeded set is verified with the toolkit's OWN
+`implementations/diagnostic/diversity_check.py` — if any pair scores >0.75 similarity
+it prints WARN so you reseed before burning N worktrees. (Graceful word-Jaccard
+fallback when run outside the repo.) Wired into `agent-templates.md`.
+
+The fix matters: agenthub previously left strategy assignment to ad-hoc coordinator
+judgment with no orthogonality guarantee — 5 agents on near-identical prompts ≈ 1.
+
+Tests 9/9 new (+19/19 loop, no regression). Smoke: 3-agent optimization set scored
+0.114 pairwise similarity → "GO: orthogonal". SKILL_COMPARISON merge #1 marked BUILT.
+Next spec'd: council-panel judge for /hub:eval (de-bias selection).

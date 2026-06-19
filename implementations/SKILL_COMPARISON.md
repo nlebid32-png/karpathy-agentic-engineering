@@ -96,13 +96,20 @@ implementations of it → a council-style panel to judge the bake-off.
   disjoint-constraint seeding (and anonymized peer review to break judge monoculture)
   is a strictly better diversity mechanism.
 
-### MERGE opportunities (proposed, not yet built)
-1. **Orthogonal seeding for agenthub** — seed its N agents with disjoint strategy
-   constraints (à la council personas: "minimize allocations", "fewest LOC",
-   "maximize readability"…) instead of one shared prompt → wider solution coverage.
-   *Highest-value, most on-theme merge. Spec'd for next iteration.*
+### MERGE opportunities
+1. ✅ **Orthogonal seeding for agenthub** — BUILT (session 4).
+   `skills/agenthub/scripts/orthogonal_seed.py` ports the council's Muon
+   orthogonalization: given a domain + N, it emits N disjoint strategy constraint
+   vectors (each with a "sole purpose" so two agents can't converge) instead of one
+   shared prompt → wider solution-space coverage. The selected set is verified with
+   the toolkit's own `implementations/diagnostic/diversity_check.py` — if lenses are
+   too correlated (>0.75 similarity) it prints `WARN` so you reseed before spawning.
+   6 domains (optimization, refactoring, copywriting, research, debugging, general).
+   Wired into `agent-templates.md`. Tests 9/9. Smoke run: 3-agent optimization set
+   scored 0.114 similarity (orthogonal). This is the merge with teeth — the project's
+   own council insight + diversity util now improve a third-party agent framework.
 2. **Council-panel judge for `/hub:eval`** — replace the single LLM judge with a
-   3-perspective orthogonal panel + anonymized review to de-bias selection.
+   3-perspective orthogonal panel + anonymized review to de-bias selection. *Next.*
 3. **Council→agenthub pipeline** — a `decide-then-build` command: council verdict gates
    whether agenthub spawns, and seeds the build directions from the Chairman synthesis.
 
