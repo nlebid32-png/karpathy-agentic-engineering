@@ -120,10 +120,16 @@ implementations of it → a council-style panel to judge the bake-off.
    agent-3 wins the correctness axis — a single metric judge would miss that the
    "winner" is the more fragile solution. This de-biases SELECTION the way merge #1
    de-biased GENERATION — the council's anti-correlation now guards both ends of agenthub.
-3. **Council→agenthub pipeline** — a `decide-then-build` command: council verdict gates
-   whether agenthub spawns, and seeds the build directions from the Chairman synthesis.
-   *Next — the capstone that chains all three: council decides → orthogonal_seed spawns →
-   council_judge selects.*
+3. ✅ **Council→agenthub decide-then-build pipeline** — BUILT (session 6, the capstone).
+   `implementations/decide_then_build/pipeline.py` chains all three into one gated motion:
+   **council decides** GO/NO-GO (a NO-GO spawns nothing — cheapest possible failure) →
+   **orthogonal_seed** generates N disjoint build strategies → emits the agenthub
+   **spawn plan** (honest boundary: agenthub's runtime does the real parallel builds) →
+   **council_judge** picks the winner via anonymized orthogonal panel. council_fn and
+   results_fn are pluggable so the whole flow runs/tests offline; the live council call
+   lazy-imports (no anthropic dep until used). Tests 13/13. Full regression 51/51 across
+   all four modules. This is the toolkit composing itself: council + diversity_check +
+   orthogonal_seed + council_judge, one command, properly gated.
 
 ### Recommendation
 Keep both. Council stays the decision layer; agenthub becomes the execution layer.

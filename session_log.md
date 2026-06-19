@@ -352,3 +352,25 @@ the more fragile solution. De-biases SELECTION as merge #1 de-biased GENERATION.
 Tests 10/10 new; full regression 38/38 (19 loop + 9 seed + 10 judge). The council's
 anti-correlation principle now guards BOTH ends of agenthub's pipeline.
 Next spec'd: council→agenthub decide-then-build pipeline (the capstone chaining all 3).
+
+## Session 6 — 2026-06-16: Decide-then-build pipeline (the capstone)
+
+Built SKILL_COMPARISON merge #3 — chains all three prior pieces into one gated motion.
+
+`implementations/decide_then_build/pipeline.py`:
+  council DECIDE (GO/NO-GO) ──GO──> orthogonal_seed SEED (N disjoint strategies)
+        │ NO-GO → STOP, spawn nothing (cheapest failure)
+        └──> agenthub spawn PLAN ──builds──> council_judge JUDGE (anonymized panel) → winner
+
+The gating is the value: a council NO-GO spawns nothing (saves N worktrees); the
+orthogonal seed keeps the N builders diverse; the panel judge de-biases selection.
+Honest boundary: the pipeline emits the spawn PLAN; agenthub's runtime does the real
+parallel builds. With no results yet → stopped_at="awaiting_results".
+
+Testable offline: council_fn + results_fn pluggable; live council lazy-imports anthropic
+(no dep until used). Tests 13/13 new. FULL REGRESSION 51/51 across all 4 modules
+(19 loop + 9 seed + 10 judge + 13 pipeline).
+
+This closes the compare→merge arc: 5 vendored skills compared, then 3 merges built that
+compose the toolkit's own council + diversity_check into agenthub at both ends and chain
+them end-to-end. The toolkit now eats its own dog food.
