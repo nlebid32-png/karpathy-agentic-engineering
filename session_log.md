@@ -283,3 +283,27 @@ Returns a float 0.0–1.0 and a GO/STOP signal.
 ---
 
 *Session 2 complete: 2026-05-23. Target confirmed (Canvas AI Pipeline). Audit complete (3 files, 11 gaps catalogued). diversity_check wired into ai_processor.py generation loop. Council ran 5 new domain-grounded personas on a live architectural decision. CONDITIONAL-GO verdict logged.*
+
+## Session 3 — 2026-06-16: Skill vendor + compare & merge
+
+Vendored 5 third-party skills (Rezvani, MIT) into `skills/`: autoresearch-agent,
+agenthub, karpathy-coder, self-improving-agent, adversarial-reviewer — all
+security-audited before install.
+
+**Compare & merge** (`implementations/SKILL_COMPARISON.md`): head-to-head of
+autoresearch-agent vs our autonomous_loop, and agenthub vs our llm_council.
+
+Merged into `autonomous_loop/runner.py` (the autoresearch-agent's best ideas):
+- **Direction-aware optimization** (`metric_direction: lower|higher`). Fixes a real
+  correctness bug — our loop hardcoded higher-is-better, but Karpathy's own metric
+  (val_bpb) is LOWER-is-better. Default stays "higher" for back-compat.
+- **Status-aware ledger** — loop_log.jsonl now records keep/discard/rollback + best_so_far.
+- **Hard per-iteration timeout** (thread watchdog) — a hung train.py can't block the loop.
+Kept OUR advantages: file-only targeted rollback, no-git operation, in-process eval.
+
+Tests: 19/19 pass (11 original + 8 new). End-to-end verified on a lower-is-better
+sequence (regression rollback + target stop both correct).
+
+**Next iteration (spec'd, not built):** port the council's Muon-style orthogonal
+seeding into agenthub — its N agents currently share one prompt (correlated attempts);
+disjoint strategy constraints would widen solution coverage. Highest-value on-theme merge.

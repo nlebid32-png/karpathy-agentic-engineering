@@ -12,9 +12,11 @@ from pathlib import Path
 def evaluate(iteration: int, config: dict) -> float:
     """
     Load train.py fresh each iteration and return a scalar metric.
-    Higher is better. Returns -inf on any error.
+    Direction (higher- vs lower-is-better) is set by `metric_direction` in
+    program.md and interpreted by runner.py; this oracle just returns the number.
+    Returns -inf on any error — runner.py treats any ±inf as a failed attempt.
 
-    Pass condition: returned float >= config['target_metric']
+    Pass condition: runner.py's target_reached() vs config['target_metric'].
     """
     try:
         if "train" in sys.modules:
