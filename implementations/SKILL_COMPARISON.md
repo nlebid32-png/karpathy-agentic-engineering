@@ -108,10 +108,22 @@ implementations of it → a council-style panel to judge the bake-off.
    Wired into `agent-templates.md`. Tests 9/9. Smoke run: 3-agent optimization set
    scored 0.114 similarity (orthogonal). This is the merge with teeth — the project's
    own council insight + diversity util now improve a third-party agent framework.
-2. **Council-panel judge for `/hub:eval`** — replace the single LLM judge with a
-   3-perspective orthogonal panel + anonymized review to de-bias selection. *Next.*
+2. ✅ **Council-panel judge for `/hub:eval`** — BUILT (session 5).
+   `skills/agenthub/scripts/council_judge.py` replaces the single-metric/single-judge
+   selection with an **anonymized** (Candidate A/B/C, no agent-N identity) **orthogonal
+   3-judge panel**: Correctness & Robustness, Simplicity (Karpathy lens), Goal
+   Effectiveness — disjoint rubrics that can't collapse to the same score. Ports
+   council._anonymize + the disjoint-persona design. Pluggable scorer: offline
+   heuristic (testable, no network) or real Claude judges with ANTHROPIC_API_KEY.
+   Wired into `coordination-strategies.md`. Tests 10/10. Demo shows the payoff: the
+   metric winner (agent-2, 21%) and agent-3 land in a near-tie (6.66 vs 6.633) because
+   agent-3 wins the correctness axis — a single metric judge would miss that the
+   "winner" is the more fragile solution. This de-biases SELECTION the way merge #1
+   de-biased GENERATION — the council's anti-correlation now guards both ends of agenthub.
 3. **Council→agenthub pipeline** — a `decide-then-build` command: council verdict gates
    whether agenthub spawns, and seeds the build directions from the Chairman synthesis.
+   *Next — the capstone that chains all three: council decides → orthogonal_seed spawns →
+   council_judge selects.*
 
 ### Recommendation
 Keep both. Council stays the decision layer; agenthub becomes the execution layer.

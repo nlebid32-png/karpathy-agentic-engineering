@@ -184,3 +184,31 @@ Agents should write results in this format:
 - **Confidence**: {High/Medium/Low} — {reason}
 - **Limitations**: {known issues or edge cases}
 ```
+
+---
+
+## Evaluation: the council-panel judge (`scripts/council_judge.py`)
+
+"LLM judge for subjective quality" above is a trap if it's a *single* judge — one
+judge has one blind spot, and every candidate it mis-weighs loses for the same
+reason. That's the correlated-judgment failure the llm_council was built to break.
+
+Use the council-panel judge for qualitative tasks, metric ties, or any time you don't
+fully trust a single number:
+
+```
+python scripts/council_judge.py --session <id>        # ranks agent results
+```
+
+Two council mechanisms, ported:
+- **Anonymized.** Candidates are stripped to A/B/C before judging — no "agent-1 is
+  usually good" or position bias leaks in.
+- **Orthogonal panel.** Three judges with disjoint rubrics that can't collapse into
+  the same score: **Correctness & Robustness**, **Simplicity & Maintainability** (the
+  Karpathy lens), **Goal Effectiveness**. The per-axis breakdown shows *why* one
+  candidate won — and surfaces the near-tie where the metric winner is actually the
+  more fragile solution.
+
+Runs offline with a transparent heuristic scorer; set `ANTHROPIC_API_KEY` for real
+Claude judges (one call per candidate × axis). Pair with metric ranking: take the
+metric winner, but let the panel veto/tiebreak when scores are within noise.

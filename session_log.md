@@ -329,3 +329,26 @@ judgment with no orthogonality guarantee — 5 agents on near-identical prompts 
 Tests 9/9 new (+19/19 loop, no regression). Smoke: 3-agent optimization set scored
 0.114 pairwise similarity → "GO: orthogonal". SKILL_COMPARISON merge #1 marked BUILT.
 Next spec'd: council-panel judge for /hub:eval (de-bias selection).
+
+## Session 5 — 2026-06-16: Council-panel judge (council → agenthub merge #2)
+
+Built SKILL_COMPARISON merge #2. agenthub's result_ranker.py only ranked by a single
+numeric metric (or raw diff-stats) — no real LLM judge despite the SKILL advertising
+one, and nothing for qualitative tasks or metric ties. A single judge is also a
+monoculture: one blind spot, every mis-weighed candidate loses for the same reason.
+
+`skills/agenthub/scripts/council_judge.py` ports two council mechanisms:
+- ANONYMIZE: candidates stripped to A/B/C before judging (council._anonymize) — kills
+  position + "agent-1 is usually good" bias.
+- ORTHOGONAL PANEL: 3 judges, disjoint rubrics that can't collapse to one score —
+  Correctness & Robustness, Simplicity (Karpathy lens), Goal Effectiveness.
+Pluggable scorer: offline heuristic (testable, no network) or real Claude judges with
+ANTHROPIC_API_KEY (one call per candidate × axis). Wired into coordination-strategies.md.
+
+Payoff (demo): metric winner agent-2 (21%) and agent-3 land in a near-tie (6.66 vs
+6.633) because agent-3 wins the correctness axis — a single metric judge would merge
+the more fragile solution. De-biases SELECTION as merge #1 de-biased GENERATION.
+
+Tests 10/10 new; full regression 38/38 (19 loop + 9 seed + 10 judge). The council's
+anti-correlation principle now guards BOTH ends of agenthub's pipeline.
+Next spec'd: council→agenthub decide-then-build pipeline (the capstone chaining all 3).
